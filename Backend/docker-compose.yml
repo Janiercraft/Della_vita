@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dellavita-postgres
+    environment:
+      POSTGRES_DB: dellavita
+      POSTGRES_USER: dellavita
+      POSTGRES_PASSWORD: dellavita
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dellavita -d dellavita"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  dellavita:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dellavita-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: dellavita
+      DB_USER: dellavita
+      DB_PASSWORD: dellavita
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:

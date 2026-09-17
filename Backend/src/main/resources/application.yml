@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+application:
+  api:
+    path: /api/v1
+
+spring:
+  application:
+    name: dellavita
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:dellavita}
+    username: ${DB_USER:dellavita}
+    password: ${DB_PASSWORD:dellavita}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: dellavita
+      jakarta.persistence.create-database-schemas: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.proyecto: INFO
+    org.hibernate.SQL: DEBUG
