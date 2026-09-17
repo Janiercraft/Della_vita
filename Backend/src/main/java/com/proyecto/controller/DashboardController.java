@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Tag(name = "Dashboard Controller")
-@RequestMapping("${application.api.path}")
+@RequestMapping("/dashboard")
 @CrossOrigin(origins = "*")
 @Slf4j
 public class DashboardController {
@@ -25,7 +25,7 @@ public class DashboardController {
 
     @Operation(summary = "Consulta el resumen ejecutivo para el hackathon URABA-PAIS")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Operacion exitosa, genera el dashboard")})
-    @PostMapping(value = "/dashboard/resumen")
+    @PostMapping(value = "/resumen")
     public DashboardDTO consultarResumen() {
         System.out.println("CONTROLLER consultarDashboard");
         return dashboardService.consultarResumen();

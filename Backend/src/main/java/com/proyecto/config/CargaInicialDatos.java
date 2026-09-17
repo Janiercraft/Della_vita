@@ -23,8 +23,7 @@ public class CargaInicialDatos implements ApplicationRunner {
         System.out.println("INICIO CargaInicialDatos");
         if (beneficiarioRepository.count() == 0) {
             System.out.println("Base vacia: importando Base_Beneficiarios_Hackathon");
-            log.info("Base vacia: importando Base_Beneficiarios_Hackathon");
-            importacionService.importarBaseHackathon();
+
         } else {
             System.out.println("OK CargaInicialDatos: ya existen beneficiarios, no se importa de nuevo");
             log.info("Ya existen beneficiarios, no se importa de nuevo");

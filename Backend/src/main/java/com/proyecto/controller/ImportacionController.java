@@ -1,33 +1,34 @@
 package com.proyecto.controller;
 
+import com.proyecto.dto.ActividadDTO;
 import com.proyecto.dto.BeneficiarioDTO;
+import com.proyecto.dto.ArchivoDTO;
 import com.proyecto.service.ImportacionService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Tag(name = "Importacion Controller")
-@RequestMapping("${application.api.path}")
+@RequestMapping("/api/beneficiarios")
 @CrossOrigin(origins = "*")
 @Slf4j
 public class ImportacionController {
 
     @Autowired
-    ImportacionService importacionService;
+    ImportacionService importacionService; // O ImportacionService, según cómo lo hayas nombrado
 
-    @Operation(summary = "Importa la base Base_Beneficiarios_Hackathon al sistema")
-    @ApiResponses({@ApiResponse(responseCode = "200", description = "Operacion exitosa, importa la base")})
-    @PostMapping(value = "/importacion/baseHackathon")
-    public BeneficiarioDTO importarBaseHackathon() {
-        System.out.println("CONTROLLER importarBaseHackathon");
-        return importacionService.importarBaseHackathon();
+    @PostMapping("/importar")
+    public ResponseEntity<BeneficiarioDTO> importarBaseCsvJson(
+            @RequestBody ArchivoDTO actividadDTO) {
+
+        BeneficiarioDTO respuesta = importacionService.importarBaseHackathon(actividadDTO);
+        return ResponseEntity.ok(respuesta);
     }
 }
