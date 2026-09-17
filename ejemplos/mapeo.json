@@ -1,0 +1,11 @@
+{
+  "mapeo": {
+    "primerNombre": "Nombre",
+    "primerApellido": "Apellido",
+    "tipoDocumento": "Tipo",
+    "numeroDocumento": "Documento",
+    "municipio": "Municipio"
+  },
+  "separador": ",",
+  "hoja": 0
+}

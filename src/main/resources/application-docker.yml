@@ -1,0 +1,17 @@
+# Perfil usado cuando el backend tambien corre dentro de Docker.
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://postgres:5432/beneficiarios?sslmode=disable}
+    username: ${DB_USER:beneficiarios}
+    password: ${DB_PASSWORD:123}
+    driver-class-name: org.postgresql.Driver
+
+application:
+  admin:
+    usuario: ${ADMIN_USER:administrador}
+    clave: ${ADMIN_PASSWORD:aguapanela12}
+  cors:
+    origenes: ${CORS_ORIGINS:http://localhost:3000}

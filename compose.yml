@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: beneficiarios
+      POSTGRES_USER: ${DB_USER:-beneficiarios}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123}
+    ports:
+      - "127.0.0.1:15432:5432"
+    volumes:
+      - datos_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-beneficiarios} -d beneficiarios"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+
+  backend:
+    build: .
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_URL: jdbc:postgresql://postgres:5432/beneficiarios
+      DB_USER: ${DB_USER:-beneficiarios}
+      DB_PASSWORD: ${DB_PASSWORD:-123}
+      ADMIN_USER: ${ADMIN_USER:-administrador}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-123}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  datos_postgres:
