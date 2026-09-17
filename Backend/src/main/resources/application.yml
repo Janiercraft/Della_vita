@@ -13,8 +13,8 @@ spring:
       enabled: true
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:dellavita}
-    username: ${DB_USER:dellavita}
-    password: ${DB_PASSWORD:dellavita}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:123}
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false

@@ -24,7 +24,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(schema = "dellavita", name = "ACTIVIDADES")
+@Table
 public class Actividad {
 
     @Id
