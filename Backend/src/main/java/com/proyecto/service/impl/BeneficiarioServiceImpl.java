@@ -23,6 +23,7 @@ import java.util.*;
 public class BeneficiarioServiceImpl implements BeneficiarioService {
     private final BeneficiarioRepository repository;
     private final AuditoriaService auditoriaService;
+    private final ControlAccesoService controlAccesoService;
 
     @Override
     @Transactional
@@ -30,10 +31,13 @@ public class BeneficiarioServiceImpl implements BeneficiarioService {
         log.info("Iniciando registro de Beneficiario");
 
         validar(dto, null);
+        controlAccesoService.validarMunicipio(dto.getMunicipio());
         Beneficiario registro = new Beneficiario();
         registro.setCodigoInterno("BEN-" + UUID.randomUUID());
 
         copiarCampos(dto, registro);
+        registro.setEstadoConsentimiento("PENDIENTE");
+        registro.setEstadoRevisionDuplicidad(determinarEstadoDuplicidad(dto));
         repository.saveAndFlush(registro);
         auditoriaService.registrar(
                 "Beneficiario",
@@ -51,6 +55,7 @@ public class BeneficiarioServiceImpl implements BeneficiarioService {
     public BeneficiarioDto editar(Long id, BeneficiarioDto dto) {
         log.info("Editando Beneficiario, id={}", id);
         Beneficiario registro = obtener(id);
+        controlAccesoService.validarBeneficiario(id);
         comprobarVersion(registro, dto.getVersion());
         if (registro.getIdBeneficiarioPrincipal() != null) {
             throw ExcepcionNegocio.conflicto(
@@ -58,6 +63,7 @@ public class BeneficiarioServiceImpl implements BeneficiarioService {
         }
         BeneficiarioDto anterior = convertirADto(registro);
         validar(dto, id);
+        controlAccesoService.validarMunicipio(dto.getMunicipio());
         copiarCampos(dto, registro);
         repository.saveAndFlush(registro);
         auditoriaService.registrar(
@@ -75,6 +81,7 @@ public class BeneficiarioServiceImpl implements BeneficiarioService {
     public BeneficiarioDto cambiarEstado(Long id, EstadoDto dto) {
         log.info("Cambiando estado de Beneficiario, id={}", id);
         Beneficiario registro = obtener(id);
+        controlAccesoService.validarBeneficiario(id);
         comprobarVersion(registro, dto.getVersion());
         if (registro.getIdBeneficiarioPrincipal() != null) {
             throw ExcepcionNegocio.conflicto(
@@ -95,6 +102,7 @@ public class BeneficiarioServiceImpl implements BeneficiarioService {
 
     @Override
     public BeneficiarioDto consultar(Long id) {
+        controlAccesoService.validarBeneficiario(id);
         return convertirADto(obtener(id));
     }
 
@@ -102,13 +110,78 @@ public class BeneficiarioServiceImpl implements BeneficiarioService {
     public Page<BeneficiarioDto> listar(
             String nombre, String documento, Boolean activo, int pagina, int tamanio) {
         String numeroDocumento = Normalizador.documento(documento);
-        Page<Beneficiario> registros =
-                repository.buscarBeneficiarios(
-                        Normalizador.clave(nombre),
-                        Objects.toString(numeroDocumento, ""),
-                        activo,
-                        Paginacion.crear(pagina, tamanio));
+        Page<Beneficiario> registros;
+        if (controlAccesoService.esOperador()) {
+            registros =
+                    repository.buscarBeneficiariosPorMunicipio(
+                            controlAccesoService.municipioAsignado(),
+                            Normalizador.clave(nombre),
+                            Objects.toString(numeroDocumento, ""),
+                            activo,
+                            Paginacion.crear(pagina, tamanio));
+        } else {
+            registros =
+                    repository.buscarBeneficiarios(
+                            Normalizador.clave(nombre),
+                            Objects.toString(numeroDocumento, ""),
+                            activo,
+                            Paginacion.crear(pagina, tamanio));
+        }
         return registros.map(this::convertirADto);
+    }
+
+
+    @Override
+    @Transactional
+    public BeneficiarioDto cambiarConsentimiento(Long id, ConsentimientoDto dto) {
+        log.info("Actualizando consentimiento informado, beneficiarioId={}", id);
+        Beneficiario registro = obtener(id);
+        controlAccesoService.validarBeneficiario(id);
+        comprobarVersion(registro, dto.getVersion());
+
+        BeneficiarioDto anterior = convertirADto(registro);
+        registro.setEstadoConsentimiento(dto.getEstado());
+        repository.saveAndFlush(registro);
+
+        auditoriaService.registrar(
+                "Beneficiario",
+                id,
+                "CONSENTIMIENTO",
+                anterior,
+                convertirADto(registro),
+                Objects.toString(dto.getMotivo(), "Cambio de consentimiento informado"));
+        return convertirADto(registro);
+    }
+
+    private String determinarEstadoDuplicidad(BeneficiarioDto dto) {
+        if (!controlAccesoService.esOperador()) {
+            return "APROBADO";
+        }
+        if (dto.getNumeroDocumento() != null || dto.getFechaNacimiento() == null) {
+            return "APROBADO";
+        }
+
+        String nombreCompleto =
+                String.join(
+                        " ",
+                        dto.getPrimerNombre(),
+                        Objects.toString(dto.getSegundoNombre(), ""),
+                        dto.getPrimerApellido(),
+                        Objects.toString(dto.getSegundoApellido(), ""));
+        String nombreNormalizado = Normalizador.clave(nombreCompleto);
+
+        boolean coincidencia =
+                repository.findByNombreNormalizadoAndFechaNacimientoOrderById(
+                                nombreNormalizado, dto.getFechaNacimiento())
+                        .stream()
+                        .anyMatch(b -> b.getIdBeneficiarioPrincipal() == null);
+
+        if (coincidencia) {
+            log.warn(
+                    "Posible duplicado sin documento detectado; registro quedara EN_REVISION_DUPLICIDAD");
+            return "EN_REVISION_DUPLICIDAD";
+        }
+        return "APROBADO";
     }
 
     private Beneficiario obtener(Long id) {
@@ -196,6 +269,8 @@ public class BeneficiarioServiceImpl implements BeneficiarioService {
         dto.setDireccion(registro.getDireccion());
         dto.setCodigoInterno(registro.getCodigoInterno());
         dto.setIdBeneficiarioPrincipal(registro.getIdBeneficiarioPrincipal());
+        dto.setEstadoRevisionDuplicidad(registro.getEstadoRevisionDuplicidad());
+        dto.setEstadoConsentimiento(registro.getEstadoConsentimiento());
         return dto;
     }
 }

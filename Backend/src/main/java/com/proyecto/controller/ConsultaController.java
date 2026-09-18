@@ -6,6 +6,7 @@ import com.proyecto.service.ConsultaService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequiredArgsConstructor
@@ -14,6 +15,7 @@ public class ConsultaController {
     private final ConsultaService servicio;
 
     @GetMapping("/beneficiarios/{id}/historial")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
     public RespuestaDto<?> historial(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int pagina,
@@ -23,6 +25,7 @@ public class ConsultaController {
     }
 
     @GetMapping("/reportes/resumen")
+    @PreAuthorize("hasRole('ADMIN')")
     public RespuestaDto<?> resumen() {
         return RespuestaDto.correcta(
                 "Totales historicos, incluidos inactivos y anulados", servicio.resumen());

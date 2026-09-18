@@ -26,4 +26,10 @@ public class Usuario extends RegistroAuditable {
 
     @Column(nullable = false, length = 20)
     private String rol;
+
+    @Column(name = "id_beneficiario")
+    private Long idBeneficiario;
+
+    @Column(name = "municipio_asignado", length = 150)
+    private String municipioAsignado;
 }

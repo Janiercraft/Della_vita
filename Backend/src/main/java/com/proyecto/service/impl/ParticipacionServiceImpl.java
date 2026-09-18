@@ -25,6 +25,7 @@ public class ParticipacionServiceImpl implements ParticipacionService {
     private final AuditoriaService auditoriaService;
     private final BeneficiarioRepository beneficiarioRepository;
     private final ProgramaRepository programaRepository;
+    private final ControlAccesoService controlAccesoService;
 
     @Override
     @Transactional
@@ -101,7 +102,9 @@ public class ParticipacionServiceImpl implements ParticipacionService {
 
     @Override
     public ParticipacionDto consultar(Long id) {
-        return convertirADto(obtener(id));
+        Participacion registro = obtener(id);
+        controlAccesoService.validarBeneficiario(registro.getIdBeneficiario());
+        return convertirADto(registro);
     }
 
     @Override
@@ -142,6 +145,16 @@ public class ParticipacionServiceImpl implements ParticipacionService {
         if (!consultarBeneficiario.get().getActivo()) {
             throw ExcepcionNegocio.conflicto("Beneficiario esta inactivo");
         }
+        controlAccesoService.validarMunicipio(consultarBeneficiario.get().getMunicipio());
+        if (!"APROBADO".equals(consultarBeneficiario.get().getEstadoRevisionDuplicidad())) {
+            throw ExcepcionNegocio.conflicto(
+                    "El beneficiario esta en revision por duplicidad y no puede vincularse a programas");
+        }
+        if (controlAccesoService.esOperador()
+                && !"OTORGADO".equals(consultarBeneficiario.get().getEstadoConsentimiento())) {
+            throw ExcepcionNegocio.conflicto(
+                    "El funcionario requiere consentimiento informado OTORGADO antes de vincular al beneficiario");
+        }
         Optional<Programa> consultarPrograma = programaRepository.findById(dto.getIdPrograma());
         if (consultarPrograma.isEmpty()) {
             throw ExcepcionNegocio.noEncontrado("Programa");
@@ -165,6 +178,8 @@ public class ParticipacionServiceImpl implements ParticipacionService {
         registro.setIdPrograma(dto.getIdPrograma());
         registro.setPeriodo(Normalizador.texto(dto.getPeriodo()));
         registro.setFechaIngreso(dto.getFechaIngreso());
+        String estado = Normalizador.clave(dto.getEstadoParticipacion());
+        registro.setEstadoParticipacion(estado.isBlank() ? "INSCRITO" : estado);
         registro.setObservaciones(Normalizador.texto(dto.getObservaciones()));
     }
 
@@ -181,6 +196,7 @@ public class ParticipacionServiceImpl implements ParticipacionService {
         dto.setIdPrograma(registro.getIdPrograma());
         dto.setPeriodo(registro.getPeriodo());
         dto.setFechaIngreso(registro.getFechaIngreso());
+        dto.setEstadoParticipacion(registro.getEstadoParticipacion());
         dto.setObservaciones(registro.getObservaciones());
         return dto;
     }

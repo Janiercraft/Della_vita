@@ -23,7 +23,7 @@ public class ProgramaController {
 
     @PostMapping
     @Operation(summary = "Guardar Programa")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> guardar(@Valid @RequestBody ProgramaDto dto) {
         ProgramaDto guardado = servicio.guardar(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -32,25 +32,27 @@ public class ProgramaController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Editar Programa; requiere version actual")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public RespuestaDto<?> editar(@PathVariable Long id, @Valid @RequestBody ProgramaDto dto) {
         return RespuestaDto.correcta("Se actualizo correctamente", servicio.editar(id, dto));
     }
 
     @PatchMapping("/{id}/estado")
     @Operation(summary = "Activar, desactivar o anular con motivo")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public RespuestaDto<?> cambiarEstado(@PathVariable Long id, @Valid @RequestBody EstadoDto dto) {
         return RespuestaDto.correcta(
                 "Se cambio el estado correctamente", servicio.cambiarEstado(id, dto));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
     public RespuestaDto<?> consultar(@PathVariable Long id) {
         return RespuestaDto.correcta("Consulta realizada", servicio.consultar(id));
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
     public RespuestaDto<?> listar(
             @RequestParam(required = false) Boolean activo,
             @RequestParam(defaultValue = "0") int pagina,

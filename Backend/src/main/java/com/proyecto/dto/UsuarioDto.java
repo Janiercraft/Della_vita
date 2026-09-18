@@ -31,4 +31,9 @@ public class UsuarioDto {
     @NotBlank
     @Pattern(regexp = "ADMIN|OPERADOR|CONSULTA")
     private String rol;
+
+    private Long idBeneficiario;
+
+    @Size(max = 150)
+    private String municipioAsignado;
 }

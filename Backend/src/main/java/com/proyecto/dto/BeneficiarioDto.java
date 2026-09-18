@@ -53,4 +53,6 @@ public class BeneficiarioDto {
 
     private String codigoInterno;
     private Long idBeneficiarioPrincipal;
+    private String estadoRevisionDuplicidad;
+    private String estadoConsentimiento;
 }

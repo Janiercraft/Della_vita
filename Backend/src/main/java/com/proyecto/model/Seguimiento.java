@@ -26,6 +26,12 @@ public class Seguimiento extends RegistroAuditable {
     @Column(name = "estado_seguimiento", nullable = false, length = 255)
     private String estadoSeguimiento;
 
+    @Column(name = "avance_novedad", nullable = true, length = 2000)
+    private String avanceNovedad;
+
+    @Column(name = "accion_pendiente", nullable = true, length = 2000)
+    private String accionPendiente;
+
     @Column(name = "observaciones", nullable = false, length = 2000)
     private String observaciones;
 

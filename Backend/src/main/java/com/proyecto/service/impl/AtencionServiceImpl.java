@@ -25,6 +25,7 @@ public class AtencionServiceImpl implements AtencionService {
     private final AuditoriaService auditoriaService;
     private final ParticipacionRepository participacionRepository;
     private final HuellaService huellaService;
+    private final ControlAccesoService controlAccesoService;
 
     @Override
     @Transactional
@@ -52,6 +53,7 @@ public class AtencionServiceImpl implements AtencionService {
         registro.setClaveIdempotencia(claveIdempotencia);
         registro.setHashSolicitud(hashSolicitud);
         copiarCampos(dto, registro);
+        registro.setEstadoValidacionAyuda(determinarEstadoValidacion(dto.getTipoAtencion()));
         repository.saveAndFlush(registro);
         auditoriaService.registrar(
                 "Atencion",
@@ -78,6 +80,7 @@ public class AtencionServiceImpl implements AtencionService {
         AtencionDto anterior = convertirADto(registro);
         validar(dto, id);
         copiarCampos(dto, registro);
+        registro.setEstadoValidacionAyuda(determinarEstadoValidacion(dto.getTipoAtencion()));
         repository.saveAndFlush(registro);
         auditoriaService.registrar(
                 "Atencion", id, "EDITAR", anterior, convertirADto(registro), "Datos actualizados");
@@ -103,9 +106,35 @@ public class AtencionServiceImpl implements AtencionService {
         return convertirADto(registro);
     }
 
+
+    @Override
+    @Transactional
+    public AtencionDto validarAyuda(Long id, ValidacionAyudaDto dto) {
+        log.info("Validando ayuda, atencionId={}", id);
+        Atencion registro = obtener(id);
+        comprobarVersion(registro, dto.getVersion());
+        if ("NO_APLICA".equals(registro.getEstadoValidacionAyuda())) {
+            throw ExcepcionNegocio.conflicto(
+                    "La atencion no fue registrada como ayuda y no requiere validacion");
+        }
+        AtencionDto anterior = convertirADto(registro);
+        registro.setEstadoValidacionAyuda(dto.getEstado());
+        repository.saveAndFlush(registro);
+        auditoriaService.registrar(
+                "Atencion",
+                id,
+                "VALIDAR_AYUDA",
+                anterior,
+                convertirADto(registro),
+                dto.getMotivo());
+        return convertirADto(registro);
+    }
+
     @Override
     public AtencionDto consultar(Long id) {
-        return convertirADto(obtener(id));
+        Atencion registro = obtener(id);
+        controlAccesoService.validarParticipacion(registro.getIdParticipacion());
+        return convertirADto(registro);
     }
 
     @Override
@@ -146,12 +175,26 @@ public class AtencionServiceImpl implements AtencionService {
         if (!consultarParticipacion.get().getActivo()) {
             throw ExcepcionNegocio.conflicto("Participacion esta inactivo");
         }
+        controlAccesoService.validarParticipacion(dto.getIdParticipacion());
+    }
+
+
+    private String determinarEstadoValidacion(String tipoAtencion) {
+        String tipo = Normalizador.clave(tipoAtencion);
+        if (tipo.contains("AYUDA") || tipo.contains("KIT") || tipo.contains("ENTREGA")) {
+            return "PENDIENTE";
+        }
+        return "NO_APLICA";
     }
 
     private void copiarCampos(AtencionDto dto, Atencion registro) {
         registro.setIdParticipacion(dto.getIdParticipacion());
         registro.setFechaAtencion(dto.getFechaAtencion());
         registro.setTipoAtencion(Normalizador.texto(dto.getTipoAtencion()));
+        registro.setDescripcion(Normalizador.texto(dto.getDescripcion()));
+        registro.setResponsable(Normalizador.texto(dto.getResponsable()));
+        registro.setResultado(Normalizador.texto(dto.getResultado()));
+        registro.setRemision(Normalizador.texto(dto.getRemision()));
         registro.setObservaciones(Normalizador.texto(dto.getObservaciones()));
     }
 
@@ -167,7 +210,12 @@ public class AtencionServiceImpl implements AtencionService {
         dto.setIdParticipacion(registro.getIdParticipacion());
         dto.setFechaAtencion(registro.getFechaAtencion());
         dto.setTipoAtencion(registro.getTipoAtencion());
+        dto.setDescripcion(registro.getDescripcion());
+        dto.setResponsable(registro.getResponsable());
+        dto.setResultado(registro.getResultado());
+        dto.setRemision(registro.getRemision());
         dto.setObservaciones(registro.getObservaciones());
+        dto.setEstadoValidacionAyuda(registro.getEstadoValidacionAyuda());
         return dto;
     }
 }

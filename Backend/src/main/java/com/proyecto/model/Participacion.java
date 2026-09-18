@@ -26,6 +26,9 @@ public class Participacion extends RegistroAuditable {
     @Column(name = "fecha_ingreso", nullable = false)
     private LocalDate fechaIngreso;
 
+    @Column(name = "estado_participacion", nullable = false, length = 30)
+    private String estadoParticipacion = "INSCRITO";
+
     @Column(name = "observaciones", nullable = true, length = 2000)
     private String observaciones;
 }

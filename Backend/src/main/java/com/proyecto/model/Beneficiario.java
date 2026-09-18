@@ -51,4 +51,10 @@ public class Beneficiario extends RegistroAuditable {
 
     @Column(nullable = false, length = 450)
     private String nombreNormalizado;
+
+    @Column(name = "estado_revision_duplicidad", nullable = false, length = 40)
+    private String estadoRevisionDuplicidad = "APROBADO";
+
+    @Column(name = "estado_consentimiento", nullable = false, length = 30)
+    private String estadoConsentimiento = "PENDIENTE";
 }

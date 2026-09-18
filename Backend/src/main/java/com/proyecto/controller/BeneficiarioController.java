@@ -39,18 +39,30 @@ public class BeneficiarioController {
 
     @PatchMapping("/{id}/estado")
     @Operation(summary = "Activar, desactivar o anular con motivo")
-    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public RespuestaDto<?> cambiarEstado(@PathVariable Long id, @Valid @RequestBody EstadoDto dto) {
         return RespuestaDto.correcta(
                 "Se cambio el estado correctamente", servicio.cambiarEstado(id, dto));
     }
 
+
+    @PatchMapping("/{id}/consentimiento")
+    @Operation(summary = "Actualizar estado de consentimiento informado")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+    public RespuestaDto<?> cambiarConsentimiento(
+            @PathVariable Long id, @Valid @RequestBody ConsentimientoDto dto) {
+        return RespuestaDto.correcta(
+                "Estado de consentimiento actualizado", servicio.cambiarConsentimiento(id, dto));
+    }
+
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
     public RespuestaDto<?> consultar(@PathVariable Long id) {
         return RespuestaDto.correcta("Consulta realizada", servicio.consultar(id));
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
     public RespuestaDto<?> listar(
             @RequestParam(defaultValue = "") String nombre,
             @RequestParam(defaultValue = "") String documento,

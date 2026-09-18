@@ -15,6 +15,8 @@ public interface SeguimientoRepository extends JpaRepository<Seguimiento, Long> 
 
     Optional<Seguimiento> findByClaveIdempotencia(String claveIdempotencia);
 
+    long countByEstadoSeguimientoIgnoreCaseAndActivoTrue(String estadoSeguimiento);
+
     @Query(
             "select e from Seguimiento e, Participacion p, Beneficiario b where e.idParticipacion ="
                     + " p.id and p.idBeneficiario = b.id and (b.id = :idBeneficiario or"
@@ -23,4 +25,8 @@ public interface SeguimientoRepository extends JpaRepository<Seguimiento, Long> 
             @Param("idBeneficiario") Long idBeneficiario, Pageable pagina);
 
     Page<Seguimiento> findByIdParticipacion(Long idParticipacion, Pageable paginacion);
+
+    Page<Seguimiento> findByUsuarioCreacion(String usuarioCreacion, Pageable paginacion);
+
+    long countByUsuarioCreacion(String usuarioCreacion);
 }

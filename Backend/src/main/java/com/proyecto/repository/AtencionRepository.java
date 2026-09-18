@@ -23,4 +23,8 @@ public interface AtencionRepository extends JpaRepository<Atencion, Long> {
             @Param("idBeneficiario") Long idBeneficiario, Pageable pagina);
 
     Page<Atencion> findByIdParticipacion(Long idParticipacion, Pageable paginacion);
+
+    Page<Atencion> findByUsuarioCreacion(String usuarioCreacion, Pageable paginacion);
+
+    long countByUsuarioCreacion(String usuarioCreacion);
 }

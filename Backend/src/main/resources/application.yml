@@ -35,6 +35,10 @@ application:
     path: /api/v1
   importacion:
     max-filas: 10000
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    modelo: ${GEMINI_MODEL:gemini-3.6-flash}
+    url: ${GEMINI_URL:https://generativelanguage.googleapis.com}
 
 logging:
   pattern:

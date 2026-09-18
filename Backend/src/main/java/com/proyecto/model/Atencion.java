@@ -23,6 +23,18 @@ public class Atencion extends RegistroAuditable {
     @Column(name = "tipo_atencion", nullable = false, length = 150)
     private String tipoAtencion;
 
+    @Column(name = "descripcion", nullable = true, length = 2000)
+    private String descripcion;
+
+    @Column(name = "responsable", nullable = true, length = 200)
+    private String responsable;
+
+    @Column(name = "resultado", nullable = true, length = 2000)
+    private String resultado;
+
+    @Column(name = "remision", nullable = true, length = 1000)
+    private String remision;
+
     @Column(name = "observaciones", nullable = true, length = 2000)
     private String observaciones;
 
@@ -33,4 +45,7 @@ public class Atencion extends RegistroAuditable {
     @Column(nullable = false, length = 64)
     @com.fasterxml.jackson.annotation.JsonIgnore
     private String hashSolicitud;
+
+    @Column(name = "estado_validacion_ayuda", nullable = false, length = 30)
+    private String estadoValidacionAyuda = "NO_APLICA";
 }

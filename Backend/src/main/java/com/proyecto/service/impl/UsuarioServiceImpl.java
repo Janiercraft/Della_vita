@@ -2,7 +2,9 @@ package com.proyecto.service.impl;
 
 import com.proyecto.dto.*;
 import com.proyecto.exception.ExcepcionNegocio;
+import com.proyecto.model.Beneficiario;
 import com.proyecto.model.Usuario;
+import com.proyecto.repository.BeneficiarioRepository;
 import com.proyecto.repository.UsuarioRepository;
 import com.proyecto.service.*;
 import com.proyecto.util.Paginacion;
@@ -24,6 +26,7 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class UsuarioServiceImpl implements UsuarioService {
     private final UsuarioRepository repository;
+    private final BeneficiarioRepository beneficiarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditoriaService auditoriaService;
 
@@ -123,6 +126,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setNombreUsuario(dto.getNombreUsuario());
         usuario.setNombreCompleto(dto.getNombreCompleto());
         usuario.setRol(dto.getRol());
+        usuario.setIdBeneficiario(validarBeneficiarioPorRol(dto.getRol(), dto.getIdBeneficiario()));
+        usuario.setMunicipioAsignado(validarMunicipioPorRol(dto.getRol(), dto.getMunicipioAsignado()));
         if (dto.getClave() != null) {
             if (dto.getClave().isBlank()
                     || dto.getClave().length() < 12
@@ -134,6 +139,48 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
     }
 
+    private Long validarBeneficiarioPorRol(String rol, Long idBeneficiario) {
+        if ("CONSULTA".equals(rol)) {
+            if (idBeneficiario == null) {
+                return null;
+            }
+            Optional<Beneficiario> beneficiario = beneficiarioRepository.findById(idBeneficiario);
+            if (beneficiario.isEmpty()) {
+                throw ExcepcionNegocio.noEncontrado("Beneficiario asociado al usuario");
+            }
+            if (!beneficiario.get().getActivo()) {
+                throw ExcepcionNegocio.conflicto("El beneficiario asociado esta inactivo");
+            }
+            return idBeneficiario;
+        }
+
+        return null;
+    }
+
+
+
+    private String validarMunicipioPorRol(String rol, String municipioAsignado) {
+        if ("OPERADOR".equals(rol)) {
+            if (municipioAsignado == null || municipioAsignado.isBlank()) {
+                throw ExcepcionNegocio.invalido(
+                        "El funcionario debe tener municipioAsignado: Apartado, Turbo o Necocli");
+            }
+            String municipio = municipioAsignado.trim();
+            if (municipio.equalsIgnoreCase("Apartado") || municipio.equalsIgnoreCase("Apartadó")) {
+                return "Apartadó";
+            }
+            if (municipio.equalsIgnoreCase("Turbo")) {
+                return "Turbo";
+            }
+            if (municipio.equalsIgnoreCase("Necocli") || municipio.equalsIgnoreCase("Necoclí")) {
+                return "Necoclí";
+            }
+            throw ExcepcionNegocio.invalido(
+                    "municipioAsignado debe ser Apartado, Turbo o Necocli");
+        }
+        return null;
+    }
+
     private UsuarioDto convertir(Usuario usuario) {
         return UsuarioDto.builder()
                 .id(usuario.getId())
@@ -142,6 +189,8 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .nombreUsuario(usuario.getNombreUsuario())
                 .nombreCompleto(usuario.getNombreCompleto())
                 .rol(usuario.getRol())
+                .idBeneficiario(usuario.getIdBeneficiario())
+                .municipioAsignado(usuario.getMunicipioAsignado())
                 .build();
     }
 }

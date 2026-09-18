@@ -11,6 +11,8 @@ public interface AtencionService {
 
     AtencionDto cambiarEstado(Long id, EstadoDto dto);
 
+    AtencionDto validarAyuda(Long id, ValidacionAyudaDto dto);
+
     AtencionDto consultar(Long id);
 
     Page<AtencionDto> listar(Boolean activo, int pagina, int tamanio);

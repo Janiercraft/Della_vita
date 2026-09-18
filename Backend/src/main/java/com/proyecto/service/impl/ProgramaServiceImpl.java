@@ -123,6 +123,7 @@ public class ProgramaServiceImpl implements ProgramaService {
 
     private void copiarCampos(ProgramaDto dto, Programa registro) {
         registro.setNombre(Normalizador.texto(dto.getNombre()));
+        registro.setLineaIntervencion(Normalizador.texto(dto.getLineaIntervencion()));
         registro.setDescripcion(Normalizador.texto(dto.getDescripcion()));
     }
 
@@ -136,6 +137,7 @@ public class ProgramaServiceImpl implements ProgramaService {
         dto.setUsuarioCreacion(registro.getUsuarioCreacion());
         dto.setUsuarioActualizacion(registro.getUsuarioActualizacion());
         dto.setNombre(registro.getNombre());
+        dto.setLineaIntervencion(registro.getLineaIntervencion());
         dto.setDescripcion(registro.getDescripcion());
         return dto;
     }

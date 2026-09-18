@@ -34,6 +34,12 @@ public class SeguimientoDto {
     @Pattern(regexp = "PENDIENTE|EN_PROCESO|FINALIZADO")
     private String estadoSeguimiento;
 
+    @Size(max = 2000)
+    private String avanceNovedad;
+
+    @Size(max = 2000)
+    private String accionPendiente;
+
     @NotBlank(message = "Falta observaciones")
     @Size(max = 2000)
     private String observaciones;

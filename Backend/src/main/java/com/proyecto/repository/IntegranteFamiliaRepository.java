@@ -16,4 +16,11 @@ public interface IntegranteFamiliaRepository extends JpaRepository<IntegranteFam
             Long idFamilia, Long idBeneficiario);
 
     Page<IntegranteFamilia> findByIdFamilia(Long idFamilia, Pageable paginacion);
+
+    @Query(
+            "select i from IntegranteFamilia i, Beneficiario b where i.idBeneficiario = b.id"
+                    + " and (b.id = :idBeneficiario or b.idBeneficiarioPrincipal = :idBeneficiario)"
+                    + " and i.activo = true order by i.id")
+    List<IntegranteFamilia> consultarPorBeneficiario(
+            @org.springframework.data.repository.query.Param("idBeneficiario") Long idBeneficiario);
 }

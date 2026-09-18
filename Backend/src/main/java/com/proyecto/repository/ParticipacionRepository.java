@@ -17,6 +17,11 @@ public interface ParticipacionRepository extends JpaRepository<Participacion, Lo
             Long idBeneficiario, Long idPrograma, String periodo);
 
     @Query(
+            "select pr.nombre, count(p.id) from Participacion p, Programa pr where p.idPrograma = pr.id"
+                    + " and p.activo = true and pr.activo = true group by pr.nombre order by pr.nombre")
+    List<Object[]> contarParticipacionesActivasPorPrograma();
+
+    @Query(
             "select p from Participacion p, Beneficiario b where p.idBeneficiario = b.id and (b.id"
                     + " = :idBeneficiario or b.idBeneficiarioPrincipal = :idBeneficiario)")
     Page<Participacion> findByIdBeneficiario(

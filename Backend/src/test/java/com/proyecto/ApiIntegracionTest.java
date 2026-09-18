@@ -154,7 +154,7 @@ class ApiIntegracionTest {
         mvc.perform(
                         get("/api/v1/beneficiarios")
                                 .param("nombre", "Maria" + nombre.substring(5))
-                                .with(user("lector").roles("CONSULTA")))
+                                .with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.datos.totalElements").value(1));
     }
@@ -620,7 +620,7 @@ class ApiIntegracionTest {
                         multipart("/api/v1/importaciones")
                                 .file(archivo)
                                 .file(configuracion)
-                                .with(user("operador").roles("OPERADOR"))
+                                .with(user("admin").roles("ADMIN"))
                                 .header("X-Requested-With", "gestion-beneficiarios"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.datos.resultados.IMPORTADO").value(1));

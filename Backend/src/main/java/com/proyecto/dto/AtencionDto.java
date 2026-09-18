@@ -33,5 +33,19 @@ public class AtencionDto {
     private String tipoAtencion;
 
     @Size(max = 2000)
+    private String descripcion;
+
+    @Size(max = 200)
+    private String responsable;
+
+    @Size(max = 2000)
+    private String resultado;
+
+    @Size(max = 1000)
+    private String remision;
+
+    @Size(max = 2000)
     private String observaciones;
+
+    private String estadoValidacionAyuda;
 }

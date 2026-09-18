@@ -11,6 +11,8 @@ public interface BeneficiarioService {
 
     BeneficiarioDto cambiarEstado(Long id, EstadoDto dto);
 
+    BeneficiarioDto cambiarConsentimiento(Long id, ConsentimientoDto dto);
+
     BeneficiarioDto consultar(Long id);
 
     Page<BeneficiarioDto> listar(

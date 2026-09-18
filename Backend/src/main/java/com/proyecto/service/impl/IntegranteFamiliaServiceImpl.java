@@ -25,6 +25,7 @@ public class IntegranteFamiliaServiceImpl implements IntegranteFamiliaService {
     private final AuditoriaService auditoriaService;
     private final FamiliaRepository familiaRepository;
     private final BeneficiarioRepository beneficiarioRepository;
+    private final ControlAccesoService controlAccesoService;
 
     @Override
     @Transactional
@@ -97,7 +98,9 @@ public class IntegranteFamiliaServiceImpl implements IntegranteFamiliaService {
 
     @Override
     public IntegranteFamiliaDto consultar(Long id) {
-        return convertirADto(obtener(id));
+        IntegranteFamilia registro = obtener(id);
+        controlAccesoService.validarBeneficiario(registro.getIdBeneficiario());
+        return convertirADto(registro);
     }
 
     @Override
@@ -137,6 +140,7 @@ public class IntegranteFamiliaServiceImpl implements IntegranteFamiliaService {
         if (!consultarFamilia.get().getActivo()) {
             throw ExcepcionNegocio.conflicto("Familia esta inactivo");
         }
+        controlAccesoService.validarMunicipio(consultarFamilia.get().getMunicipio());
         Optional<Beneficiario> consultarBeneficiario =
                 beneficiarioRepository.findById(dto.getIdBeneficiario());
         if (consultarBeneficiario.isEmpty()) {
@@ -145,6 +149,7 @@ public class IntegranteFamiliaServiceImpl implements IntegranteFamiliaService {
         if (!consultarBeneficiario.get().getActivo()) {
             throw ExcepcionNegocio.conflicto("Beneficiario esta inactivo");
         }
+        controlAccesoService.validarBeneficiario(dto.getIdBeneficiario());
 
         Optional<IntegranteFamilia> existente =
                 repository.findByIdFamiliaAndIdBeneficiario(

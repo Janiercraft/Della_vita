@@ -24,6 +24,9 @@ public class ProgramaDto {
     @Size(max = 150)
     private String nombre;
 
+    @Size(max = 150)
+    private String lineaIntervencion;
+
     @Size(max = 2000)
     private String descripcion;
 }

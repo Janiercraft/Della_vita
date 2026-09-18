@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("${application.api.path}/importaciones")
-@PreAuthorize("hasAnyRole('ADMIN','OPERADOR')")
+@PreAuthorize("hasRole('ADMIN')")
 public class ImportacionController {
     private final ImportacionService servicio;
 

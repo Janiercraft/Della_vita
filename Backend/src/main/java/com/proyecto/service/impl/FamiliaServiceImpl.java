@@ -23,6 +23,7 @@ import java.util.*;
 public class FamiliaServiceImpl implements FamiliaService {
     private final FamiliaRepository repository;
     private final AuditoriaService auditoriaService;
+    private final ControlAccesoService controlAccesoService;
 
     @Override
     @Transactional
@@ -30,6 +31,7 @@ public class FamiliaServiceImpl implements FamiliaService {
         log.info("Iniciando registro de Familia");
 
         validar(dto, null);
+        controlAccesoService.validarMunicipio(dto.getMunicipio());
         Familia registro = new Familia();
 
         copiarCampos(dto, registro);
@@ -50,9 +52,11 @@ public class FamiliaServiceImpl implements FamiliaService {
     public FamiliaDto editar(Long id, FamiliaDto dto) {
         log.info("Editando Familia, id={}", id);
         Familia registro = obtener(id);
+        controlAccesoService.validarMunicipio(registro.getMunicipio());
         comprobarVersion(registro, dto.getVersion());
         FamiliaDto anterior = convertirADto(registro);
         validar(dto, id);
+        controlAccesoService.validarMunicipio(dto.getMunicipio());
         copiarCampos(dto, registro);
         repository.saveAndFlush(registro);
         auditoriaService.registrar(
@@ -65,6 +69,7 @@ public class FamiliaServiceImpl implements FamiliaService {
     public FamiliaDto cambiarEstado(Long id, EstadoDto dto) {
         log.info("Cambiando estado de Familia, id={}", id);
         Familia registro = obtener(id);
+        controlAccesoService.validarMunicipio(registro.getMunicipio());
         comprobarVersion(registro, dto.getVersion());
         FamiliaDto anterior = convertirADto(registro);
         registro.setActivo(dto.getActivo());
@@ -81,13 +86,23 @@ public class FamiliaServiceImpl implements FamiliaService {
 
     @Override
     public FamiliaDto consultar(Long id) {
-        return convertirADto(obtener(id));
+        Familia registro = obtener(id);
+        controlAccesoService.validarMunicipio(registro.getMunicipio());
+        return convertirADto(registro);
     }
 
     @Override
     public Page<FamiliaDto> listar(Boolean activo, int pagina, int tamanio) {
         Page<Familia> registros;
-        if (activo == null) {
+        if (controlAccesoService.esOperador()) {
+            if (activo == null) {
+                registros = repository.findByMunicipioIgnoreCase(
+                        controlAccesoService.municipioAsignado(), Paginacion.crear(pagina, tamanio));
+            } else {
+                registros = repository.findByMunicipioIgnoreCaseAndActivo(
+                        controlAccesoService.municipioAsignado(), activo, Paginacion.crear(pagina, tamanio));
+            }
+        } else if (activo == null) {
             registros = repository.findAll(Paginacion.crear(pagina, tamanio));
         } else {
             registros = repository.findByActivo(activo, Paginacion.crear(pagina, tamanio));

@@ -25,6 +25,7 @@ public class SeguimientoServiceImpl implements SeguimientoService {
     private final AuditoriaService auditoriaService;
     private final ParticipacionRepository participacionRepository;
     private final HuellaService huellaService;
+    private final ControlAccesoService controlAccesoService;
 
     @Override
     @Transactional
@@ -110,7 +111,9 @@ public class SeguimientoServiceImpl implements SeguimientoService {
 
     @Override
     public SeguimientoDto consultar(Long id) {
-        return convertirADto(obtener(id));
+        Seguimiento registro = obtener(id);
+        controlAccesoService.validarParticipacion(registro.getIdParticipacion());
+        return convertirADto(registro);
     }
 
     @Override
@@ -151,6 +154,7 @@ public class SeguimientoServiceImpl implements SeguimientoService {
         if (!consultarParticipacion.get().getActivo()) {
             throw ExcepcionNegocio.conflicto("Participacion esta inactivo");
         }
+        controlAccesoService.validarParticipacion(dto.getIdParticipacion());
 
         if (dto.getFechaProximoSeguimiento() != null
                 && dto.getFechaProximoSeguimiento().isBefore(dto.getFechaSeguimiento())) {
@@ -163,7 +167,9 @@ public class SeguimientoServiceImpl implements SeguimientoService {
         registro.setIdParticipacion(dto.getIdParticipacion());
         registro.setFechaSeguimiento(dto.getFechaSeguimiento());
         registro.setFechaProximoSeguimiento(dto.getFechaProximoSeguimiento());
-        registro.setEstadoSeguimiento(Normalizador.texto(dto.getEstadoSeguimiento()));
+        registro.setEstadoSeguimiento(Normalizador.clave(dto.getEstadoSeguimiento()));
+        registro.setAvanceNovedad(Normalizador.texto(dto.getAvanceNovedad()));
+        registro.setAccionPendiente(Normalizador.texto(dto.getAccionPendiente()));
         registro.setObservaciones(Normalizador.texto(dto.getObservaciones()));
     }
 
@@ -180,6 +186,8 @@ public class SeguimientoServiceImpl implements SeguimientoService {
         dto.setFechaSeguimiento(registro.getFechaSeguimiento());
         dto.setFechaProximoSeguimiento(registro.getFechaProximoSeguimiento());
         dto.setEstadoSeguimiento(registro.getEstadoSeguimiento());
+        dto.setAvanceNovedad(registro.getAvanceNovedad());
+        dto.setAccionPendiente(registro.getAccionPendiente());
         dto.setObservaciones(registro.getObservaciones());
         return dto;
     }

@@ -156,9 +156,9 @@ Rutas adicionales:
 
 | Método | Ruta | Función |
 |---|---|---|
-| GET | `/beneficiarios/{id}/historial` | Ficha, participaciones, atenciones y seguimientos paginados |
+| GET | `/beneficiarios/{id}/historial` | Ficha consolidada: beneficiario, familia, participaciones/programas, atenciones y seguimientos |
 | POST | `/beneficiarios/unificar` | Unificación autorizada de dos fichas |
-| GET | `/reportes/resumen` | Totales históricos, incluidos inactivos y anulados |
+| GET | `/reportes/resumen` | Indicadores agregados: conserva totales históricos y agrega beneficiarios únicos, participaciones por programa y seguimientos pendientes |
 | GET | `/auditorias?entidad=Beneficiario&idRegistro=1` | Historial de cambios, solo administrador |
 | POST | `/importaciones` | Cargar y procesar archivo |
 | POST | `/importaciones/{id}/confirmar` | Procesar filas nuevas o reanudar una carga |
@@ -329,3 +329,98 @@ docker compose up -d --build
 El servicio `backend` activa automáticamente el perfil `docker`, que usa el hostname interno `postgres` y las variables de `.env`.
 
 > No uses `docker compose down -v` salvo que realmente quieras borrar la base de datos y recrear el volumen desde cero.
+
+## Asistente IA con Gemini
+
+El backend incluye un asistente IA protegido por los roles existentes de Spring Security.
+
+Variables de entorno:
+
+```env
+GEMINI_API_KEY=tu_api_key
+GEMINI_MODEL=gemini-3.6-flash
+```
+
+### Endpoints IA
+
+Todos requieren autenticacion HTTP Basic, igual que el resto de la API.
+
+- `POST /api/v1/ia/chat`: chat general. ADMIN puede consultar una persona; USER solo informacion agregada.
+- `POST /api/v1/ia/resumen`: genera un resumen ejecutivo con estadisticas agregadas.
+- `GET /api/v1/ia/sugerencias`: devuelve preguntas sugeridas segun el rol autenticado.
+- `POST /api/v1/ia/beneficiarios/{idBeneficiario}/chat`: consulta individual; solo `ADMIN`.
+
+Ejemplo de chat general:
+
+```json
+{
+  "pregunta": "Cuantos seguimientos estan pendientes?"
+}
+```
+
+Ejemplo ADMIN indicando beneficiario directamente:
+
+```json
+{
+  "pregunta": "Resume su historial y dime que acciones tiene pendientes",
+  "idBeneficiario": 1
+}
+```
+
+El contexto enviado a Gemini nunca contiene contrasenas, tokens ni direccion exacta. En consultas ADMIN, documento y celular se envian enmascarados. Para USER solo se envia informacion agregada.
+
+
+## Cumplimiento explicito de la Guia para Participantes
+
+Se ampliaron los modelos sin retirar las funcionalidades existentes para cubrir de forma directa el flujo obligatorio del reto: Registro -> Vinculacion -> Atencion o ayuda -> Seguimiento -> Reporte.
+
+Campos incorporados:
+
+- `Programa.lineaIntervencion`.
+- `Participacion.estadoParticipacion`: `INSCRITO`, `EN_PROCESO`, `FINALIZADO` o `RETIRADO`. Si un cliente antiguo no lo envia, se conserva compatibilidad asignando `INSCRITO`.
+- `Atencion.descripcion`, `responsable`, `resultado` y `remision`; se conserva `observaciones`.
+- `Seguimiento.avanceNovedad` y `accionPendiente`; se conservan `observaciones`, `estadoSeguimiento` y `fechaProximoSeguimiento`.
+- La ficha `GET /beneficiarios/{id}/historial` ahora tambien incluye `familia` y `participacionesDetalle` con nombre del programa, linea de intervencion y estado de participacion, manteniendo los campos anteriores.
+- `GET /reportes/resumen` conserva todos los indicadores previos y agrega `beneficiariosUnicos`, `seguimientosPendientes` y `participacionesPorPrograma`.
+
+Ejemplo de participacion:
+
+```json
+{
+  "idBeneficiario": 1,
+  "idPrograma": 1,
+  "periodo": "2026",
+  "fechaIngreso": "2026-09-18",
+  "estadoParticipacion": "INSCRITO",
+  "observaciones": "Vinculacion inicial"
+}
+```
+
+Ejemplo de atencion:
+
+```json
+{
+  "idParticipacion": 1,
+  "fechaAtencion": "2026-09-18",
+  "tipoAtencion": "AYUDA",
+  "descripcion": "Entrega de apoyo",
+  "responsable": "Equipo de atencion",
+  "resultado": "Ayuda entregada",
+  "remision": "No aplica",
+  "observaciones": "Registro demostrativo"
+}
+```
+
+Ejemplo de seguimiento:
+
+```json
+{
+  "idParticipacion": 1,
+  "fechaSeguimiento": "2026-09-18",
+  "fechaProximoSeguimiento": "2026-10-18",
+  "estadoSeguimiento": "PENDIENTE",
+  "avanceNovedad": "Beneficiario reporta avance en el proceso",
+  "accionPendiente": "Realizar llamada de verificacion",
+  "observaciones": "Seguimiento demostrativo"
+}
+```

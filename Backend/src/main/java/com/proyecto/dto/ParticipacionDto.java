@@ -36,6 +36,9 @@ public class ParticipacionDto {
     @PastOrPresent
     private LocalDate fechaIngreso;
 
+    @Pattern(regexp = "INSCRITO|EN_PROCESO|FINALIZADO|RETIRADO", message = "estadoParticipacion debe ser INSCRITO, EN_PROCESO, FINALIZADO o RETIRADO")
+    private String estadoParticipacion;
+
     @Size(max = 2000)
     private String observaciones;
 }
