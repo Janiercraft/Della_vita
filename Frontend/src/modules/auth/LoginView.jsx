@@ -1,69 +1,36 @@
 import React, { useState } from 'react';
-import { useAuth, DEFAULT_ACCOUNTS } from '../../core/auth/AuthContext';
-import { beneficiaryRepository } from '../beneficiaries/services/beneficiaryRepository';
-import ConsortiumLogos from '../../shared/layout/ConsortiumLogos';
+import { useAuth } from '../../core/auth/AuthContext';
+import InteractiveLogoCarousel from '../../shared/layout/InteractiveLogoCarousel';
 import {
   Shield,
   ShieldCheck,
-  User,
-  Briefcase,
   KeyRound,
   Mail,
   ArrowRight,
   Eye,
   EyeOff,
-  Paperclip,
   MapPin,
-  AlertCircle
+  AlertCircle,
+  Sparkles,
+  Users,
+  CheckCircle2
 } from 'lucide-react';
 
 export function LoginView() {
   const { login } = useAuth();
-  const [selectedRole, setSelectedRole] = useState('admin');
-  const [selectedBeneficiaryId, setSelectedBeneficiaryId] = useState('ben-001');
   const [email, setEmail] = useState('admin@uraba.org');
   const [password, setPassword] = useState('admin');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const beneficiariesList = beneficiaryRepository.getAll() || [];
-
-  const handleRoleChange = (role) => {
-    setSelectedRole(role);
-    setErrorMessage('');
-    const account = DEFAULT_ACCOUNTS[role];
-    if (account) {
-      setEmail(account.email);
-      setPassword(account.password);
-    }
-  };
-
-  const handleQuickFill = () => {
-    const account = DEFAULT_ACCOUNTS[selectedRole];
-    if (account) {
-      setEmail(account.email);
-      setPassword(account.password);
-    }
-    setErrorMessage('');
-  };
-
-  // Etiqueta de la clave de prueba según rol seleccionado
-  const passwordHint = {
-    admin: 'coordinadora',
-    profesional: 'profesional',
-    usuario: 'usuario'
-  }[selectedRole] || selectedRole;
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+    setIsSubmitting(true);
 
-    const res = login(
-      selectedRole,
-      email,
-      password,
-      selectedRole === 'usuario' ? selectedBeneficiaryId : null
-    );
+    const res = await login(email, password);
+    setIsSubmitting(false);
 
     if (!res.success) {
       setErrorMessage(res.message || 'Credenciales inválidas.');
@@ -73,274 +40,442 @@ export function LoginView() {
   return (
     <>
       <style>{`
-        .login-split-container {
-          display: flex;
+        /* ========================================================= */
+        /* CONTENEDOR FULLSCREEN CON AMBIENTACIÓN CINEMATOGRÁFICA    */
+        /* ========================================================= */
+        .login-fullscreen-root {
+          position: relative;
           width: 100vw;
-          height: 100vh;
           min-height: 100vh;
+          height: 100vh;
           margin: 0;
           padding: 0;
-          background-color: #063630;
+          background-color: #031815;
           font-family: 'Inter', system-ui, -apple-system, sans-serif;
           overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
-        /* Columna Izquierda: Mitad Exacta 50% con Fotografía y Emblema Superpuesto */
-        .login-left-pane {
-          width: 50%;
-          flex: 0 0 50%;
-          height: 100vh;
-          position: relative;
-          overflow: hidden;
-          background-color: #04211D;
-        }
-
-        .login-left-img {
+        /* Fotografía de Fondo Panorámica a Pantalla Completa */
+        .login-bg-img {
+          position: absolute;
+          inset: 0;
           width: 100%;
           height: 100%;
           object-fit: cover;
-          object-position: center;
-          display: block;
+          object-position: center 30%;
+          filter: brightness(0.65) contrast(1.1);
+          transform: scale(1.02);
+          transition: transform 10s ease-out;
         }
 
-        /* Capa oscura con gradiente para garantizar contraste y elegancia */
-        .login-left-dimmer {
+        /* Capas de Gradiente para Máximo Contraste y Look Ejecutivo */
+        .login-bg-dimmer {
           position: absolute;
           inset: 0;
-          background: linear-gradient(180deg, rgba(6, 44, 38, 0.35) 0%, rgba(4, 28, 24, 0.25) 50%, rgba(3, 20, 17, 0.65) 100%);
+          background: radial-gradient(circle at 25% 35%, rgba(13, 92, 83, 0.45) 0%, transparent 65%),
+                      radial-gradient(circle at 80% 75%, rgba(6, 44, 38, 0.6) 0%, transparent 60%),
+                      linear-gradient(135deg, rgba(3, 20, 17, 0.88) 0%, rgba(4, 31, 27, 0.8) 50%, rgba(2, 13, 11, 0.94) 100%);
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        /* Esferas de Luz Ambiental con Pulso Sutil */
+        .login-orb-1 {
+          position: absolute;
+          top: 10%;
+          left: 8%;
+          width: 420px;
+          height: 420px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(42, 186, 168, 0.2) 0%, transparent 70%);
+          filter: blur(60px);
           pointer-events: none;
           z-index: 2;
+          animation: orbPulse 9s ease-in-out infinite alternate;
         }
 
-        /* Emblema Superpuesto sobre la Foto con Tarjeta de Cristal Frosted */
-        .login-left-emblem-overlay {
+        .login-orb-2 {
           position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-          z-index: 4;
-          width: 90%;
-          max-width: 480px;
+          bottom: 8%;
+          right: 10%;
+          width: 480px;
+          height: 480px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(16, 117, 106, 0.28) 0%, transparent 70%);
+          filter: blur(75px);
           pointer-events: none;
+          z-index: 2;
+          animation: orbPulse 13s ease-in-out infinite alternate-reverse;
         }
 
-        .login-glass-card {
-          background: rgba(6, 44, 38, 0.93);
-          border: 1.5px solid rgba(255, 255, 255, 0.18);
-          border-radius: 22px;
-          padding: 2.25rem 2.5rem;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          width: 100%;
-          box-sizing: border-box;
+        @keyframes orbPulse {
+          0% {
+            transform: scale(1) translateY(0);
+            opacity: 0.7;
+          }
+          100% {
+            transform: scale(1.15) translateY(-25px);
+            opacity: 1;
+          }
         }
 
-        /* Columna Derecha: Mitad Exacta 50% con Formulario de Acceso Espacioso */
-        .login-right-pane {
-          width: 50%;
-          flex: 0 0 50%;
-          height: 100vh;
-          max-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          background-color: #FFFFFF;
-          box-sizing: border-box;
-          box-shadow: -10px 0 45px rgba(0, 0, 0, 0.25);
+        /* Contenedor Principal Adaptable a Pantalla Completa */
+        .login-main-stage {
+          position: relative;
           z-index: 10;
-          overflow-y: auto;
-        }
-
-        .login-form-wrapper {
-          flex: 1;
+          width: 92%;
+          max-width: 1240px;
+          height: auto;
+          max-height: 94vh;
           display: flex;
-          flex-direction: column;
-          justify-content: center;
-          width: 100%;
-          max-width: 530px;
-          margin: 0 auto;
-          padding: 3rem 2.5rem 2rem 2.5rem;
+          align-items: center;
+          justify-content: space-between;
+          gap: 3.5rem;
           box-sizing: border-box;
         }
 
-        .login-role-card {
-          cursor: pointer;
-          padding: 1.25rem 1rem;
-          border-radius: 14px;
-          text-align: center;
-          transition: all 0.2s ease;
-          user-select: none;
+        /* Columna Izquierda: Información Institucional y Propósito */
+        .login-hero-info {
+          flex: 1;
+          max-width: 580px;
+          display: flex;
+          flex-direction: column;
+          gap: 1.6rem;
+          color: #FFFFFF;
         }
 
-        .login-role-card.active {
-          border: 2px solid #0D5C53;
-          background-color: #F0FDF8;
-          box-shadow: 0 6px 20px rgba(13, 92, 83, 0.14);
+        .login-hero-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.55rem;
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          border-radius: 30px;
+          padding: 0.45rem 1.15rem;
+          width: fit-content;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .login-hero-title {
+          font-size: 3.1rem;
+          font-weight: 900;
+          line-height: 1.12;
+          letter-spacing: -0.035em;
+          margin: 0;
+          text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .login-hero-highlight {
+          background: linear-gradient(135deg, #4EE4CB 0%, #20BFA8 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .login-hero-desc {
+          font-size: 1.08rem;
+          line-height: 1.65;
+          color: #C3E0D8;
+          margin: 0;
+          text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Tarjetas de Métricas / Pilares en la Columna Izquierda */
+        .login-pillars-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          margin-top: 0.5rem;
+        }
+
+        .login-pillar-card {
+          background: rgba(4, 28, 24, 0.65);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 14px;
+          padding: 0.95rem 1.15rem;
+          display: flex;
+          align-items: center;
+          gap: 0.85rem;
+          transition: all 0.25s ease;
+        }
+
+        .login-pillar-card:hover {
+          border-color: rgba(78, 228, 203, 0.35);
+          background: rgba(4, 35, 30, 0.75);
           transform: translateY(-2px);
         }
 
-        .login-role-card.inactive {
-          border: 1.5px solid #E2EAE7;
-          background-color: #FFFFFF;
-        }
-
-        .login-role-card.inactive:hover {
-          border-color: #B2D0C8;
-          background-color: #F8FCFA;
-          transform: translateY(-1px);
-        }
-
-        .login-input {
-          width: 100%;
-          border-radius: 10px;
-          border: 1.5px solid #CFDDD8;
-          font-size: 0.98rem;
-          color: #11221F;
-          outline: none;
-          background-color: #FFFFFF;
+        /* ========================================================= */
+        /* TARJETA DE ACCESO GLASSMORPHIC (DERECHA / CÉNTRICA)      */
+        /* ========================================================= */
+        .login-glass-portal {
+          width: 460px;
+          flex-shrink: 0;
+          background: rgba(5, 34, 29, 0.82);
+          backdrop-filter: blur(28px);
+          -webkit-backdrop-filter: blur(28px);
+          border: 1.5px solid rgba(255, 255, 255, 0.16);
+          border-radius: 24px;
+          padding: 2.25rem 2.25rem 1.75rem 2.25rem;
+          box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.6),
+                      0 0 0 1px rgba(78, 228, 203, 0.12),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.15);
           box-sizing: border-box;
-          transition: border-color 0.18s ease, box-shadow 0.18s ease;
+          display: flex;
+          flex-direction: column;
         }
 
-        .login-input:focus {
-          border-color: #0D5C53;
-          box-shadow: 0 0 0 3.5px rgba(13, 92, 83, 0.14);
+        /* Inputs estilizados para Glassmorphism de Alto Contraste */
+        .login-glass-input {
+          width: 100%;
+          border-radius: 12px;
+          border: 1.5px solid rgba(255, 255, 255, 0.18);
+          font-size: 0.96rem;
+          color: #FFFFFF;
+          outline: none;
+          background: rgba(255, 255, 255, 0.08);
+          box-sizing: border-box;
+          transition: all 0.2s ease;
         }
 
-        .login-submit-btn {
-          margin-top: 0.6rem;
-          background-color: #094D46;
+        .login-glass-input::placeholder {
+          color: #8BA8A1;
+        }
+
+        .login-glass-input:focus {
+          border-color: #4EE4CB;
+          background: rgba(255, 255, 255, 0.14);
+          box-shadow: 0 0 0 4px rgba(78, 228, 203, 0.22);
+        }
+
+        /* Botón de Acceso Principal Premium */
+        .login-cta-button {
+          margin-top: 0.75rem;
+          background: linear-gradient(135deg, #18988B 0%, #0E6C62 100%);
           color: #FFFFFF;
           border: none;
-          border-radius: 11px;
+          border-radius: 12px;
           height: 52px;
-          padding: 0.9rem 1.5rem;
-          font-weight: 700;
+          padding: 0.85rem 1.5rem;
+          font-weight: 800;
           font-size: 1.05rem;
+          letter-spacing: -0.01em;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.6rem;
-          box-shadow: 0 4px 16px rgba(9, 77, 70, 0.28);
-          transition: all 0.2s ease;
+          gap: 0.65rem;
+          box-shadow: 0 6px 20px rgba(24, 152, 139, 0.35);
+          transition: all 0.25s ease;
         }
 
-        .login-submit-btn:hover {
-          background-color: #063630;
+        .login-cta-button:hover {
+          background: linear-gradient(135deg, #22B2A3 0%, #127E72 100%);
           transform: translateY(-2px);
-          box-shadow: 0 7px 22px rgba(9, 77, 70, 0.34);
+          box-shadow: 0 10px 28px rgba(24, 152, 139, 0.45);
         }
 
-        .login-submit-btn:active {
+        .login-cta-button:active {
           transform: translateY(0);
         }
 
-        /* Reglas Responsive y Adaptabilidad */
-        @media (max-width: 1100px) {
-          .login-form-wrapper {
-            max-width: 480px;
-            padding: 2.25rem 1.75rem;
-          }
-        }
-
-        @media (max-width: 900px) {
-          .login-split-container {
+        /* Adaptabilidad Responsive */
+        @media (max-width: 1080px) {
+          .login-main-stage {
             flex-direction: column;
-            height: auto;
-            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
             max-height: none;
+            padding: 2.5rem 1rem;
             overflow-y: auto;
           }
-          .login-left-pane {
-            width: 100%;
-            flex: none;
-            height: 250px;
-          }
-          .login-left-glass-card {
-            padding: 1.25rem 1.5rem;
-            max-width: 92%;
-          }
-          .login-left-glass-title {
-            font-size: 1.6rem !important;
-          }
-          .login-right-pane {
-            width: 100%;
-            flex: none;
+          .login-fullscreen-root {
             height: auto;
-            min-height: calc(100vh - 250px);
-            max-height: none;
-            box-shadow: none;
+            min-height: 100vh;
+            overflow-y: auto;
           }
-          .login-form-wrapper {
+          .login-hero-info {
+            text-align: center;
+            align-items: center;
             max-width: 100%;
-            padding: 2.25rem 1.5rem;
+          }
+          .login-hero-title {
+            font-size: 2.3rem;
+          }
+          .login-pillars-grid {
+            display: none;
+          }
+          .login-glass-portal {
+            width: 100%;
+            max-width: 480px;
           }
         }
 
         @media (max-width: 520px) {
-          .login-left-pane {
-            height: 210px;
+          .login-hero-title {
+            font-size: 1.85rem;
           }
-          .login-left-glass-card {
-            padding: 0.9rem 1.1rem;
-          }
-          .login-left-glass-title {
-            font-size: 1.35rem !important;
-          }
-          .login-role-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .login-form-wrapper {
-            padding: 1.75rem 1.15rem;
-          }
-          .login-main-title {
-            font-size: 1.75rem !important;
+          .login-glass-portal {
+            padding: 1.65rem 1.25rem 1.35rem 1.25rem;
           }
         }
       `}</style>
 
-      <div className="login-split-container">
-        {/* ========================================================= */}
-        {/* MITAD IZQUIERDA (50%): FOTOGRAFÍA CON TEXTO Y LOGO ENCIMA */}
-        {/* ========================================================= */}
-        <div className="login-left-pane">
-          {/* Fotografía comunitaria de fondo */}
-          <img
-            src="/login-hero.jpg"
-            alt="Aula rural comunitaria en Urabá - URABÁ-PAÍS"
-            className="login-left-img"
-          />
+      <div className="login-fullscreen-root">
+        {/* Fotografía de Fondo Panorámica */}
+        <img
+          src="/login-hero.jpg"
+          alt="Comunidad Urabá-País"
+          className="login-bg-img"
+        />
 
-          {/* Filtro degradado para realce fotográfico y contraste */}
-          <div className="login-left-dimmer" />
+        {/* Gradientes Oscuros de Contraste */}
+        <div className="login-bg-dimmer" />
 
-          {/* Emblema con tarjeta de cristal súper nítida y legible */}
-          <div className="login-left-emblem-overlay">
-            {/* Escudo + Título: sin caja de fondo, directo sobre la foto */}
+        {/* Luces Ambientales Suaves */}
+        <div className="login-orb-1" />
+        <div className="login-orb-2" />
+
+        {/* Escenario Central */}
+        <div className="login-main-stage">
+          {/* ========================================================= */}
+          {/* COLUMNA IZQUIERDA: IDENTIDAD Y ALCANCE TERRITORIAL        */}
+          {/* ========================================================= */}
+          <div className="login-hero-info">
+            {/* Badge Institucional */}
+            <div className="login-hero-badge">
+              <ShieldCheck size={16} color="#4EE4CB" strokeWidth={2.4} />
+              <span
+                style={{
+                  fontSize: '0.82rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  color: '#E0EFEB'
+                }}
+              >
+                Consorcio Humanitario Urabá-País
+              </span>
+            </div>
+
+            {/* Gran Titular */}
+            <h1 className="login-hero-title">
+              Sistema Integrado de <br />
+              <span className="login-hero-highlight">Gestión Humanitaria</span>
+            </h1>
+
+            {/* Descripción del Sistema */}
+            <p className="login-hero-desc">
+              Plataforma oficial para el registro, atención técnica, acompañamiento psicosocial
+              y seguimiento integral a beneficiarios y familias en el territorio.
+            </p>
+
+            {/* Tarjetas de Pilares Informativos */}
+            <div className="login-pillars-grid">
+              <div className="login-pillar-card">
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '10px',
+                    background: 'rgba(78, 228, 203, 0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#4EE4CB',
+                    flexShrink: 0
+                  }}
+                >
+                  <MapPin size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#FFFFFF' }}>
+                    Cobertura Territorial
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#A0C6BC' }}>
+                    Apartadó • Turbo • Necoclí
+                  </div>
+                </div>
+              </div>
+
+              <div className="login-pillar-card">
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '10px',
+                    background: 'rgba(78, 228, 203, 0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#4EE4CB',
+                    flexShrink: 0
+                  }}
+                >
+                  <Users size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#FFFFFF' }}>
+                    Enfoque Integral
+                  </div>
+                  <div style={{ fontSize: '0.74rem', color: '#A0C6BC' }}>
+                    Familias y Comunidades
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Píldora de Estado en Vivo */}
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.55rem',
+                fontSize: '0.82rem',
+                color: '#C6E4DC',
+                fontWeight: 600
+              }}
+            >
+              <div
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#4EE4CB',
+                  boxShadow: '0 0 10px #4EE4CB'
+                }}
+              />
+              <span>Portal institucional protegido con encriptación activa</span>
+            </div>
+          </div>
+
+          {/* ========================================================= */}
+          {/* COLUMNA DERECHA: PORTAL DE ACCESO EN TARJETA DE CRISTAL   */}
+          {/* ========================================================= */}
+          <div className="login-glass-portal">
+            {/* Emblema Superior de la Tarjeta */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.25rem' }}>
               <div
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.85rem',
-                  marginBottom: '0.5rem'
+                  gap: '0.7rem'
                 }}
               >
-                {/* Escudo con degradado verde esmeralda institucional */}
                 <div
                   style={{
-                    width: '52px',
-                    height: '52px',
-                    borderRadius: '15px',
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '13px',
                     background: 'linear-gradient(135deg, #26AEA2 0%, #0F6E64 100%)',
-                    boxShadow: '0 8px 22px rgba(0, 0, 0, 0.45)',
+                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.35)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -348,248 +483,69 @@ export function LoginView() {
                     border: '1.5px solid rgba(255, 255, 255, 0.35)'
                   }}
                 >
-                  <Shield size={28} strokeWidth={2.4} />
+                  <Shield size={23} strokeWidth={2.4} />
                 </div>
-
-                {/* Título Oficial */}
                 <span
-                  className="login-left-glass-title"
                   style={{
-                    fontSize: '2.25rem',
+                    fontSize: '1.75rem',
                     fontWeight: 900,
                     color: '#FFFFFF',
-                    letterSpacing: '-0.02em',
-                    textShadow: '0 2px 16px rgba(0,0,0,0.75), 0 1px 4px rgba(0,0,0,0.5)',
-                    lineHeight: 1
+                    letterSpacing: '-0.02em'
                   }}
                 >
                   URABÁ-PAÍS
                 </span>
               </div>
-
-              {/* Subtítulo — sin fondo, solo sombra para legibilidad */}
-              <div
-                style={{
-                  fontSize: '1.02rem',
-                  color: '#FFFFFF',
-                  fontWeight: 600,
-                  textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 1px 3px rgba(0,0,0,0.6)',
-                  marginBottom: '0.9rem',
-                  textAlign: 'center'
-                }}
-              >
-                Sistema Integrado de Gestión Humanitaria
-              </div>
-
-              {/* Píldora de localización — ESTA sí conserva su fondo oscuro */}
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  backgroundColor: 'rgba(4, 30, 26, 0.85)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255, 255, 255, 0.28)',
-                  borderRadius: '24px',
-                  padding: '0.35rem 1rem',
-                  fontSize: '0.82rem',
-                  color: '#E0EFEB',
-                  fontWeight: 600,
-                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.35)'
-                }}
-              >
-                <MapPin size={13} color="#42D8B8" />
-                <span>Apartadó • Turbo • Necoclí</span>
-              </div>
-          </div>
-        </div>
-
-        {/* ========================================================= */}
-        {/* MITAD DERECHA (50%): PANEL DE LOGIN CÉNTRICO Y ESPACIOSO  */}
-        {/* ========================================================= */}
-        <div className="login-right-pane">
-          {/* Cuerpo Central del Formulario (con vertical centering natural) */}
-          <div className="login-form-wrapper">
-            {/* Badge Institucional Superior */}
-            <div style={{ marginBottom: '0.65rem' }}>
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  backgroundColor: '#EBF6F4',
-                  color: '#094D46',
-                  padding: '0.35rem 0.85rem',
-                  borderRadius: '20px',
-                  fontSize: '0.78rem',
-                  fontWeight: 800,
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase'
-                }}
-              >
-                <ShieldCheck size={15} strokeWidth={2.4} />
-                Acceso Seguro al Sistema
-              </span>
             </div>
 
-            {/* Título Principal */}
-            <h1
-              className="login-main-title"
+            {/* Título Principal Centrado */}
+            <h2
               style={{
-                fontSize: '2.2rem',
+                fontSize: '1.85rem',
                 fontWeight: 800,
-                color: '#11221F',
+                color: '#FFFFFF',
                 letterSpacing: '-0.025em',
-                lineHeight: 1.18,
-                margin: '0 0 0.45rem 0'
+                lineHeight: 1.15,
+                margin: '0 0 0.35rem 0',
+                textAlign: 'center'
               }}
             >
               Iniciar Sesión
-            </h1>
+            </h2>
 
             <p
               style={{
-                fontSize: '0.98rem',
-                color: '#526964',
+                fontSize: '0.86rem',
+                color: '#A8C9C1',
                 margin: '0 0 1.65rem 0',
-                lineHeight: 1.5
+                textAlign: 'center'
               }}
             >
-              Selecciona tu tipo de acceso para ingresar a la plataforma
+              Ingresa tus credenciales para acceder a la plataforma
             </p>
 
-            {/* Selector de Rol */}
-            <div
-              style={{
-                fontSize: '0.82rem',
-                fontWeight: 800,
-                color: '#142724',
-                marginBottom: '0.65rem',
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase'
-              }}
-            >
-              1. SELECCIONA TU ROL:
-            </div>
-
-            {/* 3 ROLES: COORDINADORA, PROFESIONAL CLA, USUARIO */}
-            <div
-              className="login-role-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: '0.75rem',
-                marginBottom: '1.4rem'
-              }}
-            >
-              {/* Tarjeta Rol 1: Coordinadora */}
-              <div
-                onClick={() => handleRoleChange('admin')}
-                className={`login-role-card ${selectedRole === 'admin' ? 'active' : 'inactive'}`}
-              >
-                <div
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '11px',
-                    backgroundColor: selectedRole === 'admin' ? '#DDF4EE' : '#F1F5F4',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 0.55rem auto',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <ShieldCheck size={22} color="#0D5C53" strokeWidth={2.4} />
-                </div>
-                <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#11221F', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
-                  Coordinadora
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#55726D', marginTop: '3px', fontWeight: 500 }}>
-                  Acceso total
-                </div>
-              </div>
-
-              {/* Tarjeta Rol 2: Profesional CLA */}
-              <div
-                onClick={() => handleRoleChange('profesional')}
-                className={`login-role-card ${selectedRole === 'profesional' ? 'active' : 'inactive'}`}
-              >
-                <div
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '11px',
-                    backgroundColor: selectedRole === 'profesional' ? '#DBEEFE' : '#F1F5F4',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 0.55rem auto',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <Briefcase size={21} color="#1D6FBA" strokeWidth={2.4} />
-                </div>
-                <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#11221F', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
-                  Profesional CLA
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#55726D', marginTop: '3px', fontWeight: 500 }}>
-                  Módulos esenciales
-                </div>
-              </div>
-
-              {/* Tarjeta Rol 3: Usuario / Beneficiario */}
-              <div
-                onClick={() => handleRoleChange('usuario')}
-                className={`login-role-card ${selectedRole === 'usuario' ? 'active' : 'inactive'}`}
-              >
-                <div
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '11px',
-                    backgroundColor: selectedRole === 'usuario' ? '#F3E8FF' : '#F1F5F4',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 0.55rem auto',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <User size={21} color="#7C3AED" strokeWidth={2.4} />
-                </div>
-                <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#11221F', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
-                  Usuario
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#55726D', marginTop: '3px', fontWeight: 500 }}>
-                  Portal beneficiario
-                </div>
-              </div>
-            </div>
-
-            {/* Formulario de Credenciales */}
+            {/* Formulario de Inicio de Sesión */}
             <form
               onSubmit={handleSubmit}
-              style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}
             >
-              {/* Campo Usuario o Correo Electrónico */}
+              {/* Campo: Usuario o Correo Electrónico */}
               <div>
                 <label
                   style={{
                     display: 'block',
-                    fontSize: '0.88rem',
+                    fontSize: '0.85rem',
                     fontWeight: 700,
-                    color: '#1E3A34',
+                    color: '#E0EFEB',
                     marginBottom: '0.45rem'
                   }}
                 >
-                  Usuario o Correo Electrónico:
+                  Usuario o Correo Electrónico
                 </label>
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <Mail
-                    size={19}
-                    color="#7C928E"
+                    size={18}
+                    color="#4EE4CB"
                     style={{ position: 'absolute', left: '14px', pointerEvents: 'none' }}
                   />
                   <input
@@ -597,54 +553,34 @@ export function LoginView() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="login-input"
+                    placeholder="ej: admin@uraba.org"
+                    className="login-glass-input"
                     style={{
                       padding: '0.85rem 1rem 0.85rem 2.85rem',
-                      height: '50px'
+                      height: '48px'
                     }}
                   />
                 </div>
               </div>
 
-              {/* Campo Contraseña */}
+              {/* Campo: Contraseña (Sin Autocompletar Clave) */}
               <div>
-                <div
+                <label
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
+                    display: 'block',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    color: '#E0EFEB',
                     marginBottom: '0.45rem'
                   }}
                 >
-                  <label style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1E3A34' }}>
-                    Contraseña:
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleQuickFill}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#0D5C53',
-                      fontSize: '0.82rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.3rem',
-                      padding: 0
-                    }}
-                    title="Cargar credenciales automáticas"
-                  >
-                    <Paperclip size={14} strokeWidth={2.4} />
-                    <span>Autocompletar clave</span>
-                  </button>
-                </div>
+                  Contraseña
+                </label>
 
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <KeyRound
-                    size={19}
-                    color="#7C928E"
+                    size={18}
+                    color="#4EE4CB"
                     style={{ position: 'absolute', left: '14px', pointerEvents: 'none' }}
                   />
                   <input
@@ -652,10 +588,11 @@ export function LoginView() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="login-input"
+                    placeholder="Ingresa tu contraseña"
+                    className="login-glass-input"
                     style={{
                       padding: '0.85rem 2.85rem 0.85rem 2.85rem',
-                      height: '50px'
+                      height: '48px'
                     }}
                   />
                   <button
@@ -663,23 +600,21 @@ export function LoginView() {
                     onClick={() => setShowPassword(!showPassword)}
                     style={{
                       position: 'absolute',
-                      right: '12px',
+                      right: '10px',
                       background: 'none',
                       border: 'none',
                       cursor: 'pointer',
-                      color: '#8A9E9A',
+                      color: '#A0C6BC',
                       padding: '6px',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      transition: 'color 0.2s ease'
                     }}
                     title={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
                   >
-                    {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
-                </div>
-                <div style={{ fontSize: '0.8rem', color: '#6A8480', marginTop: '0.4rem', fontWeight: 500 }}>
-                  Clave de prueba: <strong style={{ color: '#094D46', fontWeight: 700 }}>{passwordHint}</strong>
                 </div>
               </div>
 
@@ -687,15 +622,15 @@ export function LoginView() {
               {errorMessage && (
                 <div
                   style={{
-                    backgroundColor: '#FDF2F2',
-                    border: '1px solid #F8B4B4',
-                    borderRadius: '9px',
-                    padding: '0.65rem 0.9rem',
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    borderRadius: '10px',
+                    padding: '0.65rem 0.85rem',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.55rem',
                     fontSize: '0.84rem',
-                    color: '#9B1C1C'
+                    color: '#FCA5A5'
                   }}
                 >
                   <AlertCircle size={16} style={{ flexShrink: 0 }} />
@@ -703,64 +638,42 @@ export function LoginView() {
                 </div>
               )}
 
-              {/* Botón Ingresar */}
-              <button type="submit" className="login-submit-btn">
-                <span>Ingresar al Sistema</span>
+              {/* Botón de Ingreso */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="login-cta-button"
+              >
+                <span>{isSubmitting ? 'Verificando...' : 'Ingresar al Sistema'}</span>
                 <ArrowRight size={19} strokeWidth={2.4} />
               </button>
             </form>
-          </div>
 
-          {/* Pie Institucional del Consorcio con Logos */}
-          <div
-            style={{
-              padding: '1.25rem 2rem 1.4rem 2rem',
-              textAlign: 'center',
-              borderTop: '1px solid #EAEFEF',
-              backgroundColor: '#F9FCFB',
-              width: '100%',
-              boxSizing: 'border-box'
-            }}
-          >
+            {/* Separador Sutil */}
             <div
               style={{
-                fontSize: '0.72rem',
-                color: '#374151',
-                fontWeight: 800,
-                marginBottom: '0.65rem',
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase'
+                height: '1px',
+                background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent)',
+                margin: '1.4rem 0 1.1rem 0'
               }}
-            >
-              CONSORCIO HUMANITARIO LÍDER DEL PROYECTO
-            </div>
+            />
 
-            {/* Contenedor Oscuro con los Logos Oficiales */}
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#072C27',
-                borderRadius: '12px',
-                padding: '0.5rem 1.35rem',
-                boxShadow: '0 3px 10px rgba(0, 0, 0, 0.14)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                maxWidth: '100%',
-                boxSizing: 'border-box'
-              }}
-            >
-              <ConsortiumLogos style={{ gap: '1rem', padding: '0.15rem 0' }} />
-            </div>
+            {/* Pie con Carrusel Interactivo de Logos Oficiales */}
+            <div style={{ textAlign: 'center' }}>
+              <div
+                style={{
+                  fontSize: '0.68rem',
+                  color: '#95B8AF',
+                  fontWeight: 800,
+                  marginBottom: '0.55rem',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase'
+                }}
+              >
+                CONSORCIO HUMANITARIO LÍDER DEL PROYECTO
+              </div>
 
-            <div
-              style={{
-                fontSize: '0.72rem',
-                color: '#7B948F',
-                marginTop: '0.65rem'
-              }}
-            >
-              Habeas Data • Tratamiento Ético y Confidencial de Información Humanitaria
+              <InteractiveLogoCarousel />
             </div>
           </div>
         </div>

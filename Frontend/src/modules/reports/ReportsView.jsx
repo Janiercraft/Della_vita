@@ -11,7 +11,8 @@ import {
   Package,
   ShieldCheck,
   Search,
-  ArrowRight
+  ArrowRight,
+  Upload
 } from 'lucide-react';
 
 export function ReportsView() {
@@ -151,20 +152,20 @@ export function ReportsView() {
       {activeSubTab === 'dashboard' ? (
         <div>
           {/* Banner de acceso rápido a la Ficha 360° */}
-          <div
-            style={{
-              padding: '0.85rem 1.25rem',
-              backgroundColor: '#EFF9F6',
-              border: '1px solid #B8E4D5',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '0.75rem',
-              marginBottom: '1.25rem'
-            }}
-          >
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem', flexDirection: 'column' }}>
+              <div
+                style={{
+                  padding: '0.85rem 1.25rem',
+                  backgroundColor: '#EFF9F6',
+                  border: '1px solid #B8E4D5',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem'
+                }}
+              >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               <div
                 style={{
@@ -206,6 +207,73 @@ export function ReportsView() {
               <span>Ir a Ficha 360° e Imprimir</span>
               <ArrowRight size={14} />
             </button>
+          </div>
+            
+          {/* Banner para Carga de Excel */}
+            <div
+              style={{
+                padding: '0.85rem 1.25rem',
+                backgroundColor: '#F4F7F6',
+                border: '1px dashed #B8E4D5',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '0.75rem'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    backgroundColor: '#E8F7F1',
+                    color: '#178358',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}
+                >
+                  <Upload size={16} />
+                </div>
+                <div style={{ fontSize: '0.88rem', color: '#1B4740' }}>
+                  <strong>Carga de datos masivos (Excel)</strong> Sube tu archivo con los indicadores actualizados.
+                </div>
+              </div>
+
+              <label
+                style={{
+                  backgroundColor: '#178358',
+                  color: '#FFFFFF',
+                  padding: '0.45rem 0.95rem',
+                  borderRadius: '8px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#136b48'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#178358'}
+              >
+                <span>Subir Archivo Excel</span>
+                <input 
+                  type="file" 
+                  accept=".xlsx, .xls" 
+                  style={{ display: 'none' }} 
+                  onChange={(e) => {
+                    if (e.target.files.length > 0) {
+                      setFeedbackMessage("Archivo Excel cargado exitosamente.");
+                    }
+                  }} 
+                />
+              </label>
+            </div>
           </div>
 
           {/* 4 Tarjetas de Métricas Globales del Sistema */}

@@ -1,54 +1,11 @@
+import { apiFetch } from '../api/apiClient';
+
 /**
  * Adaptador de API HTTP (Spring Boot Backend REST)
- * Consume el Backend en http://localhost:8080/api/v1 con Basic Auth y DTO Mappings
+ * Consume el Backend y se apoya en apiClient (apiFetch) que ya maneja JWT/Basic Auth
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
-const DEFAULT_AUTH = btoa('administrador:aguapanela12');
-
 class ApiAdapter {
-  constructor() {
-    this.baseUrl = API_BASE_URL;
-    this.authHeader = `Basic ${DEFAULT_AUTH}`;
-  }
-
-  setAuth(usuario, clave) {
-    if (usuario && clave) {
-      this.authHeader = `Basic ${btoa(`${usuario}:${clave}`)}`;
-    }
-  }
-
-  getHeaders(customHeaders = {}) {
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': this.authHeader,
-      'X-Requested-With': 'gestion-beneficiarios',
-      ...customHeaders
-    };
-  }
-
-
-  async request(endpoint, options = {}) {
-    const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
-    const config = {
-      ...options,
-      headers: this.getHeaders(options.headers || {})
-    };
-
-    try {
-      const response = await fetch(url, config);
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.mensaje || `Error HTTP ${response.status}: ${response.statusText}`);
-      }
-      const json = await response.json();
-      return json.datos !== undefined ? json.datos : json;
-    } catch (err) {
-      console.warn(`[ApiAdapter] Fallo petición en ${endpoint}:`, err.message);
-      throw err;
-    }
-  }
-
   // --- DTO TRANSFORMERS ---
   fromBeneficiarioDto(dto) {
     if (!dto) return null;
@@ -66,14 +23,36 @@ class ApiAdapter {
       secondName: dto.segundoNombre || '',
       firstLastName: dto.primerApellido || '',
       secondLastName: dto.segundoApellido || '',
-      documentType: dto.tipoDocumento || 'CC',
+      documentType: dto.tipoDocumento || 'SD',
       documentNumber: dto.numeroDocumento || '',
       birthDate: dto.fechaNacimiento || '',
       phone: dto.celular || '',
       municipality: dto.municipio || 'Apartadó',
       address: dto.direccion || '',
       internalCode: dto.codigoInterno || `UP-2026-${String(dto.id).padStart(4, '0')}`,
-      familyMembers: []
+      
+      // Caracterización
+      populationGroup: dto.grupoPoblacional || 'Comunidad Local',
+      ethnicity: dto.pertenenciaEtnica || 'Ninguna / No aplica',
+      isHeadOfHousehold: dto.jefaturaHogar === true,
+      disability: dto.discapacidad || '',
+      
+      // Familia
+      familyMembers: (dto.familiares && dto.familiares.length > 0) 
+          ? dto.familiares.map(f => ({
+              id: f.id,
+              fullName: f.nombreCompleto || `${f.primerNombre} ${f.primerApellido}`,
+              firstName: f.primerNombre,
+              firstLastName: f.primerApellido,
+              documentType: f.tipoDocumento,
+              documentNumber: f.numeroDocumento,
+              relationship: f.parentesco
+          })) 
+          : Array(dto.cantidadFamiliares || 0).fill({ id: 'dummy', fullName: 'Familiar Registrado' }),
+      
+      duplicityStatus: dto.estadoRevisionDuplicidad || 'APROBADO',
+      dataProcessingConsent: dto.estadoConsentimiento === 'OTORGADO' || dto.estadoConsentimiento === 'ACTIVO',
+      consentStatus: dto.estadoConsentimiento || 'PENDIENTE'
     };
   }
 
@@ -91,14 +70,23 @@ class ApiAdapter {
       segundoNombre: segundoNombre || null,
       primerApellido,
       segundoApellido: segundoApellido || null,
-      tipoDocumento: model.documentType || 'CC',
-      numeroDocumento: model.documentNumber || '',
+      tipoDocumento: model.documentType === 'SD' ? null : (model.documentType || null),
+      numeroDocumento: model.documentType === 'SD' ? null : (model.documentNumber || null),
       fechaNacimiento: model.birthDate || null,
       celular: model.phone || null,
       municipio: model.municipality || 'Apartadó',
       direccion: model.address || null,
       codigoInterno: model.internalCode || null,
-      activo: model.active !== false
+      
+      // Caracterización
+      grupoPoblacional: model.populationGroup || null,
+      pertenenciaEtnica: model.ethnicity || null,
+      jefaturaHogar: model.isHeadOfHousehold === true,
+      discapacidad: model.disability || null,
+      
+      activo: model.active !== false,
+      estadoRevisionDuplicidad: model.duplicityStatus || 'APROBADO',
+      estadoConsentimiento: model.dataProcessingConsent ? 'OTORGADO' : (model.consentStatus || 'PENDIENTE')
     };
   }
 
@@ -148,57 +136,97 @@ class ApiAdapter {
       pagina: params.pagina || 0,
       tamanio: params.tamanio || 100
     });
-    const res = await this.request(`/beneficiarios?${query.toString()}`);
-    const items = Array.isArray(res) ? res : (res && res.content ? res.content : []);
+    const res = await apiFetch.get(`/beneficiarios?${query.toString()}`);
+    const items = Array.isArray(res.datos) ? res.datos : (res.datos?.content ? res.datos.content : []);
     return items.map(dto => this.fromBeneficiarioDto(dto));
   }
 
   async getBeneficiarioById(id) {
-    const dto = await this.request(`/beneficiarios/${id}`);
-    return this.fromBeneficiarioDto(dto);
+    const res = await apiFetch.get(`/beneficiarios/${id}`);
+    return this.fromBeneficiarioDto(res.datos);
   }
 
   async createBeneficiario(model) {
     const dto = this.toBeneficiarioDto(model);
-    const createdDto = await this.request('/beneficiarios', {
-      method: 'POST',
-      body: JSON.stringify(dto)
-    });
-    return this.fromBeneficiarioDto(createdDto);
+    let res = await apiFetch.post('/beneficiarios', dto);
+    
+    const estadoConsentimiento = model.dataProcessingConsent ? 'OTORGADO' : (model.consentStatus || 'PENDIENTE');
+    if (estadoConsentimiento !== 'PENDIENTE') {
+      try {
+        await apiFetch.patch(`/beneficiarios/${res.datos.id}/consentimiento`, {
+          version: res.datos.version || 0,
+          estado: estadoConsentimiento,
+          motivo: 'Autorización firmada desde frontend'
+        });
+        res.datos.estadoConsentimiento = estadoConsentimiento;
+        res.datos.version = (res.datos.version || 0) + 1; // optimistic update
+      } catch(e) {
+        console.warn('Fallo guardando consentimiento:', e);
+      }
+    }
+    
+    return this.fromBeneficiarioDto(res.datos);
   }
 
   async updateBeneficiario(id, model) {
     const dto = this.toBeneficiarioDto(model);
-    const updatedDto = await this.request(`/beneficiarios/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(dto)
+    let res = await apiFetch.put(`/beneficiarios/${id}`, dto);
+    
+    const estadoConsentimiento = model.dataProcessingConsent ? 'OTORGADO' : (model.consentStatus || 'PENDIENTE');
+    try {
+      await apiFetch.patch(`/beneficiarios/${id}/consentimiento`, {
+        version: model.version || 0,
+        estado: estadoConsentimiento,
+        motivo: 'Actualizado desde frontend'
+      });
+      res.datos.estadoConsentimiento = estadoConsentimiento;
+      res.datos.version = (res.datos.version || 0) + 1;
+    } catch(e) {
+      console.warn('Fallo actualizando consentimiento:', e);
+    }
+
+    return this.fromBeneficiarioDto(res.datos);
+  }
+
+  async changeBeneficiarioStatus(id, activo, motivo) {
+    const res = await apiFetch.patch(`/beneficiarios/${id}/estado`, {
+      activo: activo,
+      motivo: motivo || 'Actualización de estado desde UI'
     });
-    return this.fromBeneficiarioDto(updatedDto);
+    return this.fromBeneficiarioDto(res.datos);
+  }
+  
+  async addFamiliar(beneficiarioId, familiarModel) {
+    const dtoFamiliar = this.toBeneficiarioDto(familiarModel);
+    // Usamos el nuevo endpoint orquestador
+    const res = await apiFetch.post(`/beneficiarios/${beneficiarioId}/familiares`, {
+       beneficiario: dtoFamiliar,
+       parentesco: familiarModel.relationship || 'Familiar'
+    });
+    return this.fromBeneficiarioDto(res.datos);
   }
 
   async getAtenciones() {
-    const res = await this.request('/atenciones?pagina=0&tamanio=100');
-    const items = Array.isArray(res) ? res : (res && res.content ? res.content : []);
+    const res = await apiFetch.get('/atenciones?pagina=0&tamanio=100');
+    const items = Array.isArray(res.datos) ? res.datos : (res.datos?.content ? res.datos.content : []);
     return items.map(dto => this.fromAtencionDto(dto));
   }
 
   async createAtencion(model) {
     const dto = this.toAtencionDto(model);
-    const createdDto = await this.request('/atenciones', {
-      method: 'POST',
-      body: JSON.stringify(dto)
-    });
-    return this.fromAtencionDto(createdDto);
+    const res = await apiFetch.post('/atenciones', dto);
+    return this.fromAtencionDto(res.datos);
   }
 
   async getProgramas() {
-    const res = await this.request('/programas?pagina=0&tamanio=100');
-    const items = Array.isArray(res) ? res : (res && res.content ? res.content : []);
+    const res = await apiFetch.get('/programas?pagina=0&tamanio=100');
+    const items = Array.isArray(res.datos) ? res.datos : (res.datos?.content ? res.datos.content : []);
     return items.map(dto => this.fromProgramaDto(dto));
   }
 
   async getFicha360(id) {
-    return await this.request(`/beneficiarios/${id}/historial`);
+    const res = await apiFetch.get(`/beneficiarios/${id}/historial`);
+    return res.datos;
   }
 }
 

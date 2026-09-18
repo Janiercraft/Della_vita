@@ -130,17 +130,19 @@ function MainLayout() {
   };
 
   return (
-    <div className="app-container">
-      {/* Barra lateral institucional */}
-      <Sidebar
-        activeTab={activeTab}
-        onSelectTab={handleSelectTab}
-        isOpenMobile={isOpenMobile}
-        onCloseMobile={() => setIsOpenMobile(false)}
-      />
+    <div className={`app-container ${!isStaff ? 'portal-home-mode' : ''}`}>
+      {/* Barra lateral institucional: Solo activa para el equipo administrativo (Staff) */}
+      {isStaff && (
+        <Sidebar
+          activeTab={activeTab}
+          onSelectTab={handleSelectTab}
+          isOpenMobile={isOpenMobile}
+          onCloseMobile={() => setIsOpenMobile(false)}
+        />
+      )}
 
-      {/* Área de Contenido Principal */}
-      <div className="main-content">
+      {/* Área de Contenido Principal Adaptada a Pantalla Completa para el Usuario */}
+      <div className={`main-content ${!isStaff ? 'portal-main-full' : ''}`}>
         <Navbar
           onOpenMobileSidebar={() => setIsOpenMobile(true)}
           activeTabName={getTabTitle()}
@@ -187,7 +189,7 @@ function MainLayout() {
         )}
 
         {/* Barrera 2 de Seguridad: Renderizado Condicional Estricto por Rol */}
-        <main className="page-wrapper">
+        <main className={role === 'usuario' ? "page-wrapper portal-page-wrapper" : "page-wrapper"}>
           <ErrorBoundary key={`${role}-${activeTab}`}>
             {role === 'usuario' ? (
               <BeneficiaryPortalView />

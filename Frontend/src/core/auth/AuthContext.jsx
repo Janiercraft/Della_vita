@@ -1,178 +1,87 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { apiFetch } from '../api/apiClient';
 import { beneficiaryRepository } from '../../modules/beneficiaries/services/beneficiaryRepository';
 
 const AuthContext = createContext(null);
-
-export const DEFAULT_ACCOUNTS = {
-  admin: {
-    id: 'usr-admin-01',
-    role: 'admin',
-    name: 'Dra. Carmen Valencia',
-    title: 'Coordinadora General del Consorcio',
-    organization: 'COOPI • FADV • HIAS • HI',
-    email: 'admin@uraba.org',
-    password: 'admin',
-    avatarInitials: 'CV',
-    badgeColor: '#094D46',
-    territory: 'Territorio Urabá (Apartadó, Turbo, Necoclí)'
-  },
-  coordinador: {
-    id: 'usr-coord-01',
-    role: 'coordinador',
-    name: 'Ing. Roberto Montoya',
-    title: 'Coordinador Territorial de Proyectos',
-    organization: 'Consorcio Humanitario Urabá-País',
-    email: 'coordinador@uraba.org',
-    password: 'coordinador',
-    avatarInitials: 'RM',
-    badgeColor: '#0D5C53',
-    territory: 'Apartadó • Turbo • Necoclí'
-  },
-  profesional: {
-    id: 'usr-prof-01',
-    role: 'profesional',
-    name: 'Lic. Andrés Restrepo',
-    title: 'Profesional Psicosocial y de Terreno',
-    organization: 'Equipo Técnico de Atención Humanitaria',
-    email: 'profesional@uraba.org',
-    password: 'profesional',
-    avatarInitials: 'AR',
-    badgeColor: '#1E6F65',
-    territory: 'Apartadó y Necoclí'
-  },
-  usuario: {
-    id: 'usr-cit-01',
-    role: 'usuario',
-    beneficiaryId: 'ben-001',
-    name: 'María Elena Rivas Palacios',
-    title: 'Beneficiaria Titular',
-    organization: 'Comunidad Urabá-País',
-    email: 'maria.rivas@uraba.org',
-    password: 'usuario',
-    avatarInitials: 'MR',
-    badgeColor: '#1CA89D',
-    internalCode: 'UP-2026-0001',
-    territory: 'Apartadó'
-  }
-};
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('uraba_auth_user');
-      if (saved) {
-        return JSON.parse(saved);
-      }
+      return saved ? JSON.parse(saved) : null;
     } catch {
-      // fallback
+      return null;
     }
-    return DEFAULT_ACCOUNTS.admin; // Inicia por defecto logueado como Admin para comodidad, o en LoginView si no está autenticado
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const saved = localStorage.getItem('uraba_auth_authenticated');
-    return saved !== null ? saved === 'true' : true;
+    return localStorage.getItem('uraba_auth_authenticated') === 'true';
   });
 
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem('uraba_auth_user', JSON.stringify(currentUser));
-      localStorage.setItem('uraba_auth_authenticated', String(isAuthenticated));
+      localStorage.setItem('uraba_auth_authenticated', 'true');
     } else {
       localStorage.removeItem('uraba_auth_user');
       localStorage.setItem('uraba_auth_authenticated', 'false');
     }
-  }, [currentUser, isAuthenticated]);
+  }, [currentUser]);
 
-  const login = (role, email, password, customBeneficiaryId = null) => {
-    // 1. Administrador
-    if (role === 'admin') {
-      const adminAccount = DEFAULT_ACCOUNTS.admin;
-      if (password !== adminAccount.password && password !== 'admin123') {
-        return { success: false, message: 'Contraseña incorrecta para el rol de Administrador.' };
+  const login = async (email, password) => {
+    try {
+      // 1. Guardar las credenciales temporales
+      const base64Credentials = btoa(`${email}:${password}`);
+      localStorage.setItem('basic_auth_token', base64Credentials);
+
+      // 2. Intentar obtener el perfil del servidor
+      const response = await apiFetch.get('/auth/me');
+
+      if (response && response.datos) {
+        const userData = response.datos;
+        const mappedRole = userData.rol.toLowerCase();
+        
+        const mappedUser = {
+          id: String(userData.id),
+          role: mappedRole === 'operador' ? 'coordinador' : mappedRole, // Mapeo temporal operador -> coordinador para compatibilidad de vistas
+          name: userData.nombreCompleto,
+          email: userData.nombreUsuario,
+          beneficiaryId: userData.idBeneficiario ? String(userData.idBeneficiario) : null,
+          territory: userData.municipioAsignado || 'Urabá',
+          avatarInitials: userData.nombreCompleto.substring(0, 2).toUpperCase(),
+          badgeColor: mappedRole === 'admin' ? '#094D46' : mappedRole === 'operador' ? '#0D5C53' : '#1CA89D'
+        };
+
+        // Extra info si es beneficiario (por ahora lo consultamos del repositorio local, en futuros modulos será del back)
+        if (mappedRole === 'consulta' || mappedRole === 'usuario') {
+            mappedUser.role = 'usuario';
+            if (mappedUser.beneficiaryId) {
+                const benRecord = beneficiaryRepository.getById(mappedUser.beneficiaryId);
+                if (benRecord) {
+                    mappedUser.internalCode = benRecord.internalCode;
+                    mappedUser.territory = benRecord.municipality;
+                }
+            }
+        }
+
+        setCurrentUser(mappedUser);
+        setIsAuthenticated(true);
+        return { success: true };
       }
-      setCurrentUser(adminAccount);
-      setIsAuthenticated(true);
-      return { success: true };
+      return { success: false, message: 'Respuesta inválida del servidor' };
+    } catch (error) {
+      localStorage.removeItem('basic_auth_token');
+      return { success: false, message: error.message || 'Credenciales inválidas' };
     }
-
-    // 2. Coordinador
-    if (role === 'coordinador') {
-      const coordAccount = DEFAULT_ACCOUNTS.coordinador;
-      if (password !== coordAccount.password && password !== 'coordinador123') {
-        return { success: false, message: 'Contraseña incorrecta para el rol de Coordinador.' };
-      }
-      setCurrentUser(coordAccount);
-      setIsAuthenticated(true);
-      return { success: true };
-    }
-
-    // 3. Profesional
-    if (role === 'profesional') {
-      const profAccount = DEFAULT_ACCOUNTS.profesional;
-      if (password !== profAccount.password && password !== 'profesional123') {
-        return { success: false, message: 'Contraseña incorrecta para el rol de Profesional.' };
-      }
-      setCurrentUser(profAccount);
-      setIsAuthenticated(true);
-      return { success: true };
-    }
-
-    // 4. Usuario / Beneficiario
-    if (role === 'usuario') {
-      const userAccount = { ...DEFAULT_ACCOUNTS.usuario };
-      if (password !== userAccount.password && password !== 'usuario123' && password !== '123456') {
-        return { success: false, message: 'Contraseña incorrecta para el rol de Usuario.' };
-      }
-
-      // Si seleccionó un beneficiario específico de la base de datos
-      const benId = customBeneficiaryId || userAccount.beneficiaryId;
-      const benRecord = beneficiaryRepository.getById(benId);
-
-      if (benRecord) {
-        userAccount.beneficiaryId = benRecord.id;
-        userAccount.name = benRecord.fullName;
-        userAccount.internalCode = benRecord.internalCode;
-        userAccount.territory = benRecord.municipality;
-        userAccount.avatarInitials = benRecord.fullName.slice(0, 2).toUpperCase();
-      }
-
-      setCurrentUser(userAccount);
-      setIsAuthenticated(true);
-      return { success: true };
-    }
-
-    return { success: false, message: 'Rol no reconocido.' };
   };
 
   const logout = () => {
+    localStorage.removeItem('basic_auth_token');
+    setCurrentUser(null);
     setIsAuthenticated(false);
   };
 
-  // Conmutador directo de rol para demostraciones rápidas ante el jurado
-  const switchRole = (targetRole, targetBeneficiaryId = null) => {
-    if (DEFAULT_ACCOUNTS[targetRole]) {
-      if (targetRole === 'usuario') {
-        const userAccount = { ...DEFAULT_ACCOUNTS.usuario };
-        const benId = targetBeneficiaryId || 'ben-001';
-        const benRecord = beneficiaryRepository.getById(benId);
-        if (benRecord) {
-          userAccount.beneficiaryId = benRecord.id;
-          userAccount.name = benRecord.fullName;
-          userAccount.internalCode = benRecord.internalCode;
-          userAccount.territory = benRecord.municipality;
-          userAccount.avatarInitials = benRecord.fullName.slice(0, 2).toUpperCase();
-        }
-        setCurrentUser(userAccount);
-      } else {
-        setCurrentUser(DEFAULT_ACCOUNTS[targetRole]);
-      }
-      setIsAuthenticated(true);
-    }
-  };
-
-  const role = currentUser?.role || 'admin';
-  // Solo Coordinadora (admin/coordinador) puede autorizar coincidencias de nombre duplicado
+  const role = currentUser?.role || 'invitado';
   const canApproveConflicts = role === 'admin' || role === 'coordinador';
 
   return (
@@ -183,8 +92,7 @@ export function AuthProvider({ children }) {
         role,
         canApproveConflicts,
         login,
-        logout,
-        switchRole
+        logout
       }}
     >
       {children}

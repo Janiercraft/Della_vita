@@ -23,33 +23,63 @@ export function Navbar({ onOpenMobileSidebar, activeTabName }) {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button
-          onClick={onOpenMobileSidebar}
-          className="hamburger-btn"
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'var(--text-main)',
-            cursor: 'pointer',
-            padding: '0.375rem',
-            borderRadius: 'var(--radius-sm)',
-            display: 'none',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-          aria-label="Abrir menú"
-        >
-          <Menu size={22} />
-        </button>
+        {role === 'usuario' ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '11px',
+                background: 'linear-gradient(135deg, #1CA89D 0%, #094D46 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#FFFFFF',
+                boxShadow: '0 3px 10px rgba(9, 77, 70, 0.25)'
+              }}
+            >
+              <Shield size={22} strokeWidth={2.4} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontWeight: 900, fontSize: '1.1rem', color: '#094D46', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                URABÁ-PAÍS
+              </span>
+              <span style={{ fontSize: '0.72rem', color: '#1CA89D', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Portal de Autogestión Ciudadana
+              </span>
+            </div>
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={onOpenMobileSidebar}
+              className="hamburger-btn"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-main)',
+                cursor: 'pointer',
+                padding: '0.375rem',
+                borderRadius: 'var(--radius-sm)',
+                display: 'none',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              aria-label="Abrir menú"
+            >
+              <Menu size={22} />
+            </button>
 
-        {/* Breadcrumb institucional */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-          <span style={{ color: '#829994', fontWeight: 600 }}>URABÁ-PAÍS</span>
-          <span style={{ color: '#BAC7C4', fontSize: '0.9rem' }}>&gt;</span>
-          <span style={{ fontWeight: 700, color: '#094D46' }}>
-            {activeTabName || 'Gestión Humanitaria'}
-          </span>
-        </div>
+            {/* Breadcrumb institucional */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+              <span style={{ color: '#829994', fontWeight: 600 }}>URABÁ-PAÍS</span>
+              <span style={{ color: '#BAC7C4', fontSize: '0.9rem' }}>&gt;</span>
+              <span style={{ fontWeight: 700, color: '#094D46' }}>
+                {activeTabName || 'Gestión Humanitaria'}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

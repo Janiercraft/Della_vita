@@ -11,13 +11,39 @@ export function BeneficiaryDetailModal({
   isOpen,
   onClose,
   beneficiary,
-  onEdit
+  onEdit,
+  onChangeStatus
 }) {
   if (!beneficiary) return null;
 
   const familyMembers = beneficiary.familyMembers || [];
   const linkedPrograms = programRepository.getByBeneficiaryId(beneficiary.id);
   const linkedEvents = attentionRepository.getByBeneficiaryId(beneficiary.id);
+
+  const calculateAge = (birthDateString) => {
+    if (!birthDateString) return null;
+    const today = new Date();
+    const birthDate = new Date(birthDateString);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const handleStatusChange = () => {
+    const isActive = beneficiary.active !== false;
+    const actionName = isActive ? 'Desactivar/Anular' : 'Activar';
+    const reason = window.prompt(`Ingrese el motivo para ${actionName.toLowerCase()} a este beneficiario (solo Admin):`);
+    
+    if (reason !== null && reason.trim() !== '') {
+      onChangeStatus(beneficiary.id, !isActive, reason);
+      onClose();
+    } else if (reason !== null) {
+      alert("El motivo es obligatorio para auditar esta acción.");
+    }
+  };
 
   return (
     <Modal
@@ -27,21 +53,36 @@ export function BeneficiaryDetailModal({
       size="lg"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
-            Cerrar
-          </Button>
-          {onEdit && (
-            <Button
-              variant="primary"
-              icon={Edit2}
-              onClick={() => {
-                onClose();
-                onEdit(beneficiary);
-              }}
-            >
-              Editar Información
-            </Button>
-          )}
+          <div style={{ display: 'flex', gap: '0.75rem', width: '100%', justifyContent: 'space-between' }}>
+            <div>
+              {onChangeStatus && (
+                <Button
+                  variant="secondary"
+                  onClick={handleStatusChange}
+                  style={{ backgroundColor: beneficiary.active === false ? '#16A34A' : '#FEF2F2', color: beneficiary.active === false ? 'white' : '#DC2626', border: beneficiary.active === false ? 'none' : '1px solid #FCA5A5' }}
+                >
+                  {beneficiary.active === false ? 'Reactivar' : 'Desactivar'}
+                </Button>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <Button variant="secondary" onClick={onClose}>
+                Cerrar
+              </Button>
+              {onEdit && (
+                <Button
+                  variant="primary"
+                  icon={Edit2}
+                  onClick={() => {
+                    onClose();
+                    onEdit(beneficiary);
+                  }}
+                >
+                  Editar Información
+                </Button>
+              )}
+            </div>
+          </div>
         </>
       }
     >
@@ -66,9 +107,10 @@ export function BeneficiaryDetailModal({
               ) : (
                 <span>{beneficiary.documentType}: <strong>{beneficiary.documentNumber}</strong></span>
               )}
-              {beneficiary.birthDate && ` • Nacimiento: ${beneficiary.birthDate}`}
-              {beneficiary.gender && ` • ${beneficiary.gender}`}
             </p>
+            <span style={{ fontSize: '0.92rem', color: 'var(--text-main)', opacity: 0.9 }}>
+              {beneficiary.birthDate ? `${calculateAge(beneficiary.birthDate)} años` : 'Edad N/D'}
+            </span>
           </div>
           <div style={{ textAlign: 'right' }}>
             <span className="badge badge-info">{beneficiary.populationGroup || 'Comunidad Local'}</span>
@@ -81,9 +123,9 @@ export function BeneficiaryDetailModal({
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
               <MapPin size={14} color="var(--color-primary)" /> Territorio / Municipio
             </div>
-            <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>
-              {beneficiary.municipality} {beneficiary.communityZone ? `(${beneficiary.communityZone})` : ''}
-            </div>
+            <strong style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-main)', marginTop: '0.15rem' }}>
+              {beneficiary.municipality}
+            </strong>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
               {beneficiary.address || 'Sin dirección específica'}
             </div>
@@ -103,10 +145,11 @@ export function BeneficiaryDetailModal({
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
-              <UserCheck size={14} color="var(--color-primary)" /> Condición Especial
+              <UserCheck size={14} color="var(--color-primary)" /> Enfoque Diferencial
             </div>
-            <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>
-              {beneficiary.hasDisability ? `Discapacidad (${beneficiary.disabilityDetails || 'Declarada'})` : 'Sin condición de discapacidad'}
+            <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem' }}>
+              {beneficiary.isHeadOfHousehold && <span className="badge badge-primary" style={{marginRight: '0.5rem', display: 'inline-block', marginBottom: '0.25rem'}}>Jefatura de Hogar</span>}
+              {beneficiary.disability ? <span className="badge badge-warning" style={{display: 'inline-block'}}>Discapacidad: {beneficiary.disability}</span> : (!beneficiary.isHeadOfHousehold && <span style={{fontWeight: 'normal', color: 'var(--text-muted)'}}>Sin condiciones especiales</span>)}
             </div>
           </div>
         </div>

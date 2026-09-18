@@ -58,19 +58,8 @@ function LogoItem({ id, name, fullName, customSrc, height = '20px', maxWidth = '
 }
 
 export default function ConsortiumLogos({ style, className } = {}) {
-  return (
-    <div
-      className={className}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '0.5rem',
-        padding: '0.35rem 0.2rem',
-        color: '#FFFFFF',
-        ...style
-      }}
-    >
+  const renderLogos = () => (
+    <>
       {/* 1. COOPI */}
       <LogoItem
         id="coopi"
@@ -222,6 +211,24 @@ export default function ConsortiumLogos({ style, className } = {}) {
           </svg>
         }
       />
+    </>
+  );
+
+  return (
+    <div
+      className={`logos-carousel-container ${className || ''}`}
+      style={{
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        width: '100%',
+        padding: '0.35rem 0',
+        ...style
+      }}
+    >
+      <div className="logos-carousel-track" style={{ display: 'inline-flex', gap: '1rem', alignItems: 'center', color: '#FFFFFF' }}>
+        {renderLogos()}
+        {renderLogos()}
+      </div>
     </div>
   );
 }

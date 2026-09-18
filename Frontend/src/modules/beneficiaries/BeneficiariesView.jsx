@@ -27,6 +27,7 @@ export function BeneficiariesView({ directOpenBeneficiaryId, onClearDirectOpen }
     setFeedbackMessage,
     verifyDuplicate,
     saveBeneficiary,
+    changeBeneficiaryStatus,
     openCreateModal,
     openEditModal,
     openDetailModal,

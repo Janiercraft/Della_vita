@@ -13,9 +13,13 @@ export function useBeneficiaries() {
   const [editingBeneficiary, setEditingBeneficiary] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
 
-  const loadBeneficiaries = useCallback(() => {
-    const list = beneficiaryRepository.getAll();
-    setBeneficiaries(list);
+  const loadBeneficiaries = useCallback(async () => {
+    try {
+      const list = await beneficiaryRepository.getAll();
+      setBeneficiaries(list);
+    } catch (e) {
+      console.error(e);
+    }
   }, []);
 
   useEffect(() => {
@@ -24,7 +28,7 @@ export function useBeneficiaries() {
 
   // Lista filtrada en tiempo real (por texto, municipio y tipo de documento)
   const filteredBeneficiaries = useMemo(() => {
-    return beneficiaryRepository.search(searchQuery, municipalityFilter, documentTypeFilter);
+    return beneficiaryRepository.searchInList(beneficiaries, searchQuery, municipalityFilter, documentTypeFilter);
   }, [searchQuery, municipalityFilter, documentTypeFilter, beneficiaries]);
 
   // Verificación reactiva de duplicados (se usa en el formulario mientras el usuario tipea)
@@ -33,36 +37,63 @@ export function useBeneficiaries() {
   }, [beneficiaries]);
 
   // Guardar (Crear o Actualizar)
-  const saveBeneficiary = useCallback((formData) => {
+  const saveBeneficiary = useCallback(async (formData) => {
     try {
+      let targetBeneficiary = null;
       if (editingBeneficiary) {
-        const updated = beneficiaryRepository.update(editingBeneficiary.id, formData);
-        loadBeneficiaries();
-        setFeedbackMessage({ type: 'success', text: `Beneficiario ${updated.fullName} actualizado exitosamente.` });
-        if (selectedBeneficiary && selectedBeneficiary.id === updated.id) {
-          setSelectedBeneficiary(updated);
-        }
-        setIsFormOpen(false);
-        setEditingBeneficiary(null);
-        return { success: true, beneficiary: updated };
+        targetBeneficiary = await beneficiaryRepository.update(editingBeneficiary.id, formData);
+        setFeedbackMessage({ type: 'success', text: `Beneficiario ${targetBeneficiary.fullName || targetBeneficiary.firstName} actualizado exitosamente.` });
       } else {
-        const created = beneficiaryRepository.create(formData);
-        loadBeneficiaries();
-        setFeedbackMessage({ type: 'success', text: `Beneficiario ${created.fullName} registrado con código ${created.internalCode}.` });
-        setIsFormOpen(false);
-        return { success: true, beneficiary: created };
+        targetBeneficiary = await beneficiaryRepository.create(formData);
+        setFeedbackMessage({ type: 'success', text: `Beneficiario ${targetBeneficiary.fullName || targetBeneficiary.firstName} registrado con código ${targetBeneficiary.internalCode}.` });
       }
+
+      // Procesar familiares nuevos que tengan IDs temporales (empiezan con 'fam-temp')
+      if (formData.familyMembers && formData.familyMembers.length > 0) {
+        for (const member of formData.familyMembers) {
+          if (String(member.id).startsWith('fam-temp')) {
+             try {
+               await beneficiaryRepository.addFamilyMember(targetBeneficiary.id, member);
+             } catch (e) {
+               console.warn("Error agregando familiar:", e.message);
+             }
+          }
+        }
+      }
+
+      await loadBeneficiaries();
+      if (selectedBeneficiary && selectedBeneficiary.id === (editingBeneficiary ? editingBeneficiary.id : targetBeneficiary.id)) {
+         setSelectedBeneficiary(targetBeneficiary);
+      }
+      setIsFormOpen(false);
+      setEditingBeneficiary(null);
+      return { success: true, beneficiary: targetBeneficiary };
     } catch (err) {
       setFeedbackMessage({ type: 'error', text: err.message });
       return { success: false, error: err.message };
     }
   }, [editingBeneficiary, loadBeneficiaries, selectedBeneficiary]);
 
-  // Gestión de miembros del núcleo familiar
-  const addFamilyMember = useCallback((beneficiaryId, memberData) => {
+  const changeBeneficiaryStatus = useCallback(async (id, activo, motivo) => {
     try {
-      const updated = beneficiaryRepository.addFamilyMember(beneficiaryId, memberData);
-      loadBeneficiaries();
+      const updated = await beneficiaryRepository.changeStatus(id, activo, motivo);
+      await loadBeneficiaries();
+      if (selectedBeneficiary && selectedBeneficiary.id === id) {
+        setSelectedBeneficiary(updated);
+      }
+      setFeedbackMessage({ type: 'success', text: `Beneficiario ${activo ? 'activado' : 'inactivado'} exitosamente.` });
+      return { success: true, beneficiary: updated };
+    } catch (err) {
+      setFeedbackMessage({ type: 'error', text: err.message });
+      return { success: false, error: err.message };
+    }
+  }, [loadBeneficiaries, selectedBeneficiary]);
+
+  // Gestión de miembros del núcleo familiar
+  const addFamilyMember = useCallback(async (beneficiaryId, memberData) => {
+    try {
+      const updated = await beneficiaryRepository.addFamilyMember(beneficiaryId, memberData);
+      await loadBeneficiaries();
       if (selectedBeneficiary && selectedBeneficiary.id === beneficiaryId) {
         setSelectedBeneficiary(updated);
       }
@@ -74,10 +105,10 @@ export function useBeneficiaries() {
     }
   }, [loadBeneficiaries, selectedBeneficiary]);
 
-  const removeFamilyMember = useCallback((beneficiaryId, memberId) => {
+  const removeFamilyMember = useCallback(async (beneficiaryId, memberId) => {
     try {
-      const updated = beneficiaryRepository.removeFamilyMember(beneficiaryId, memberId);
-      loadBeneficiaries();
+      const updated = await beneficiaryRepository.removeFamilyMember(beneficiaryId, memberId);
+      await loadBeneficiaries();
       if (selectedBeneficiary && selectedBeneficiary.id === beneficiaryId) {
         setSelectedBeneficiary(updated);
       }
@@ -129,6 +160,7 @@ export function useBeneficiaries() {
     setFeedbackMessage,
     verifyDuplicate,
     saveBeneficiary,
+    changeBeneficiaryStatus,
     addFamilyMember,
     removeFamilyMember,
     openCreateModal,

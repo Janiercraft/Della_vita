@@ -22,14 +22,15 @@ export function BeneficiaryFormModal({
 }) {
   const { canApproveConflicts } = useAuth();
   const initialFormState = {
-    fullName: '',
+    firstName: '',
+    secondName: '',
+    firstLastName: '',
+    secondLastName: '',
     documentType: 'CC',
     documentNumber: '',
     birthDate: '',
-    gender: 'Femenino',
     phone: '',
     municipality: 'Apartadó',
-    communityZone: '',
     address: '',
     populationGroup: 'Comunidad Local',
     ethnicity: 'Ninguna / No aplica',
@@ -80,7 +81,7 @@ export function BeneficiaryFormModal({
     const { name, value, type, checked } = e.target;
     const val = type === 'checkbox' ? checked : value;
     
-    if (name === 'documentNumber' || name === 'documentType' || name === 'fullName' || name === 'birthDate' || name === 'phone') {
+    if (name === 'documentNumber' || name === 'documentType' || name === 'firstName' || name === 'firstLastName' || name === 'birthDate' || name === 'phone') {
       handleDocumentChange(name, val);
     } else {
       setFormData(prev => ({ ...prev, [name]: val }));
@@ -126,7 +127,8 @@ export function BeneficiaryFormModal({
 
     // Validaciones mínimas
     const errors = {};
-    if (!formData.fullName.trim()) errors.fullName = 'El nombre completo es requerido.';
+    if (!formData.firstName.trim()) errors.firstName = 'El primer nombre es requerido.';
+    if (!formData.firstLastName.trim()) errors.firstLastName = 'El primer apellido es requerido.';
     if (formData.documentType !== 'SD' && !formData.documentNumber.trim()) {
       errors.documentNumber = 'El número de documento es obligatorio para este tipo.';
     }
@@ -292,15 +294,44 @@ export function BeneficiaryFormModal({
             1. Información Básica y Documento de Identidad
           </h4>
           <div className="form-grid">
-            <div className="col-8">
+            <div className="col-3">
               <Input
-                label="Nombre completo"
-                name="fullName"
-                value={formData.fullName}
+                label="Primer Nombre"
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleFieldChange}
-                placeholder="Ej. María Elena Rivas Palacios"
+                placeholder="Ej. María"
                 required
-                error={formErrors.fullName}
+                error={formErrors.firstName}
+              />
+            </div>
+            <div className="col-3">
+              <Input
+                label="Segundo Nombre"
+                name="secondName"
+                value={formData.secondName}
+                onChange={handleFieldChange}
+                placeholder="Ej. Elena"
+              />
+            </div>
+            <div className="col-3">
+              <Input
+                label="Primer Apellido"
+                name="firstLastName"
+                value={formData.firstLastName}
+                onChange={handleFieldChange}
+                placeholder="Ej. Rivas"
+                required
+                error={formErrors.firstLastName}
+              />
+            </div>
+            <div className="col-3">
+              <Input
+                label="Segundo Apellido"
+                name="secondLastName"
+                value={formData.secondLastName}
+                onChange={handleFieldChange}
+                placeholder="Ej. Palacios"
               />
             </div>
             <div className="col-4">
@@ -313,7 +344,7 @@ export function BeneficiaryFormModal({
                 required
               />
             </div>
-            <div className="col-6">
+            <div className="col-4">
               <Input
                 label={isWithoutDoc ? 'Número de documento (Opcional)' : 'Número de documento'}
                 name="documentNumber"
@@ -326,22 +357,13 @@ export function BeneficiaryFormModal({
                 helperText={isWithoutDoc ? 'Persona en condición especial indocumentada o en trámite de regularización.' : ''}
               />
             </div>
-            <div className="col-3">
+            <div className="col-4">
               <Input
                 label="Fecha de nacimiento"
                 name="birthDate"
                 type="date"
                 value={formData.birthDate}
                 onChange={handleFieldChange}
-              />
-            </div>
-            <div className="col-3">
-              <Select
-                label="Género"
-                name="gender"
-                value={formData.gender}
-                onChange={handleFieldChange}
-                options={GENDERS}
               />
             </div>
           </div>
@@ -352,7 +374,7 @@ export function BeneficiaryFormModal({
             2. Ubicación Territorial y Contacto (Urabá)
           </h4>
           <div className="form-grid">
-            <div className="col-4">
+            <div className="col-6">
               <Select
                 label="Municipio"
                 name="municipality"
@@ -363,22 +385,13 @@ export function BeneficiaryFormModal({
                 error={formErrors.municipality}
               />
             </div>
-            <div className="col-4">
+            <div className="col-6">
               <Input
                 label="Teléfono / WhatsApp de contacto"
                 name="phone"
                 value={formData.phone}
                 onChange={handleFieldChange}
                 placeholder="Ej. 311 555 0123"
-              />
-            </div>
-            <div className="col-4">
-              <Input
-                label="Comuna, Vereda o Sector"
-                name="communityZone"
-                value={formData.communityZone}
-                onChange={handleFieldChange}
-                placeholder="Ej. Barrio Obrero / Vereda El Totumo"
               />
             </div>
             <div className="col-12">
