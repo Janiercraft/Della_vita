@@ -1,0 +1,55 @@
+{
+  "info": {
+    "name": "URABA-PAIS - Asistente IA por roles",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:8080/api/v1"}
+  ],
+  "item": [
+    {
+      "name": "IA - Chat general segun rol",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"pregunta\": \"Que informacion puedes mostrarme segun mi rol?\"\n}"},
+        "url": {"raw": "{{baseUrl}}/ia/chat", "host": ["{{baseUrl}}"], "path": ["ia", "chat"]}
+      }
+    },
+    {
+      "name": "IA - ADMIN resumen ejecutivo",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": {"raw": "{{baseUrl}}/ia/resumen", "host": ["{{baseUrl}}"], "path": ["ia", "resumen"]}
+      }
+    },
+    {
+      "name": "IA - ADMIN beneficiario",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"pregunta\": \"Resume sus atenciones, seguimientos y dime que funcionarios los registraron\"\n}"},
+        "url": {"raw": "{{baseUrl}}/ia/beneficiarios/1/chat", "host": ["{{baseUrl}}"], "path": ["ia", "beneficiarios", "1", "chat"]}
+      }
+    },
+    {
+      "name": "IA - FUNCIONARIO mis registros",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"pregunta\": \"Que atenciones he realizado recientemente?\"\n}"},
+        "url": {"raw": "{{baseUrl}}/ia/funcionario/chat", "host": ["{{baseUrl}}"], "path": ["ia", "funcionario", "chat"]}
+      }
+    },
+    {
+      "name": "IA - USUARIO mi informacion",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"pregunta\": \"Que atenciones he recibido y cual es mi proximo seguimiento?\"\n}"},
+        "url": {"raw": "{{baseUrl}}/ia/mi-informacion/chat", "host": ["{{baseUrl}}"], "path": ["ia", "mi-informacion", "chat"]}
+      }
+    }
+  ]
+}

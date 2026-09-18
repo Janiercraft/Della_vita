@@ -1,0 +1,19 @@
+# Perfil de desarrollo local.
+# Se carga automaticamente al pulsar Run en VS Code porque application.yml
+# define "spring.profiles.default: local".
+
+spring:
+  datasource:
+    # Puerto 15432 en Windows -> 5432 dentro del contenedor PostgreSQL.
+    # Se usa 127.0.0.1 para evitar cualquier ambiguedad con localhost/IPv6.
+    url: jdbc:postgresql://127.0.0.1:15432/beneficiarios?sslmode=disable
+    username: beneficiarios
+    password: "123"
+    driver-class-name: org.postgresql.Driver
+
+application:
+  admin:
+    usuario: administrador
+    clave: aguapanela12
+  cors:
+    origenes: http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173,http://127.0.0.1:3000

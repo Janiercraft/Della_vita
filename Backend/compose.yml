@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: uraba-postgres
+    environment:
+      POSTGRES_DB: beneficiarios
+      POSTGRES_USER: ${DB_USER:-beneficiarios}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123}
+    ports:
+      - "127.0.0.1:15432:5432"
+    volumes:
+      - datos_postgres:/var/lib/postgresql/data
+    networks:
+      uraba_backend_net:
+        aliases:
+          - postgres
+          - database
+          - db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${DB_USER:-beneficiarios} -d beneficiarios"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uraba-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: beneficiarios
+      DB_URL: jdbc:postgresql://database:5432/beneficiarios?sslmode=disable
+      DB_USER: ${DB_USER:-beneficiarios}
+      DB_PASSWORD: ${DB_PASSWORD:-123}
+      ADMIN_USER: ${ADMIN_USER:-administrador}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-aguapanela12}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.6-flash}
+      GEMINI_URL: ${GEMINI_URL:-https://generativelanguage.googleapis.com}
+      GEMINI_CONNECT_TIMEOUT_MS: ${GEMINI_CONNECT_TIMEOUT_MS:-5000}
+      GEMINI_READ_TIMEOUT_MS: ${GEMINI_READ_TIMEOUT_MS:-15000}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-flash}
+      DEEPSEEK_URL: ${DEEPSEEK_URL:-https://api.deepseek.com}
+      DEEPSEEK_CONNECT_TIMEOUT_MS: ${DEEPSEEK_CONNECT_TIMEOUT_MS:-5000}
+      DEEPSEEK_READ_TIMEOUT_MS: ${DEEPSEEK_READ_TIMEOUT_MS:-15000}
+      IA_REINTENTOS_GEMINI: ${IA_REINTENTOS_GEMINI:-0}
+      IA_REINTENTOS_DEEPSEEK: ${IA_REINTENTOS_DEEPSEEK:-1}
+      IA_ESPERA_REINTENTO_MS: ${IA_ESPERA_REINTENTO_MS:-700}
+    ports:
+      - "8080:8080"
+    networks:
+      - uraba_backend_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure:5
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/actuator/health >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+networks:
+  uraba_backend_net:
+    name: uraba_backend_net
+    driver: bridge
+
+volumes:
+  datos_postgres:
+    name: uraba_datos_postgres

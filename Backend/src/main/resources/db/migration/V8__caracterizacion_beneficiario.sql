@@ -1,0 +1,5 @@
+ALTER TABLE beneficiario
+    ADD COLUMN IF NOT EXISTS grupo_poblacional VARCHAR(150),
+    ADD COLUMN IF NOT EXISTS pertenencia_etnica VARCHAR(150),
+    ADD COLUMN IF NOT EXISTS jefatura_hogar BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS discapacidad VARCHAR(500);

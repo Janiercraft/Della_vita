@@ -1,0 +1,67 @@
+server:
+  port: 8080
+  error:
+    include-message: never
+    include-stacktrace: never
+
+spring:
+  application:
+    name: gestion-beneficiarios
+  profiles:
+    # Al ejecutar ProyectoApplication desde VS Code sin indicar perfil,
+    # Spring usara automaticamente application-local.yml.
+    default: local
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+
+application:
+  api:
+    path: /api/v1
+  importacion:
+    max-filas: 10000
+  ia:
+    # Gemini es el proveedor principal. DeepSeek se usa automaticamente como fallback.
+    reintentos-gemini: ${IA_REINTENTOS_GEMINI:0}
+    reintentos-deepseek: ${IA_REINTENTOS_DEEPSEEK:1}
+    espera-reintento-ms: ${IA_ESPERA_REINTENTO_MS:700}
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    modelo: ${GEMINI_MODEL:gemini-3.6-flash}
+    url: ${GEMINI_URL:https://generativelanguage.googleapis.com}
+    timeout-conexion-ms: ${GEMINI_CONNECT_TIMEOUT_MS:5000}
+    timeout-lectura-ms: ${GEMINI_READ_TIMEOUT_MS:15000}
+  deepseek:
+    api-key: ${DEEPSEEK_API_KEY:}
+    modelo: ${DEEPSEEK_MODEL:deepseek-flash}
+    url: ${DEEPSEEK_URL:https://api.deepseek.com}
+    timeout-conexion-ms: ${DEEPSEEK_CONNECT_TIMEOUT_MS:5000}
+    timeout-lectura-ms: ${DEEPSEEK_READ_TIMEOUT_MS:15000}
+
+logging:
+  pattern:
+    level: '%5p [solicitud:%X{solicitudId}]'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

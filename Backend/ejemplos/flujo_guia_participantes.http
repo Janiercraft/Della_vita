@@ -1,0 +1,129 @@
+@baseUrl = http://localhost:8080/api/v1
+@auth = Basic administrador aguapanela12
+
+### 1. Buscar a la persona antes de crearla
+GET {{baseUrl}}/beneficiarios?documento=100000001
+Authorization: {{auth}}
+
+### 2. Registrar beneficiario (si no existe)
+POST {{baseUrl}}/beneficiarios
+Authorization: {{auth}}
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+
+{
+  "primerNombre": "Ana",
+  "primerApellido": "Demostracion",
+  "tipoDocumento": "CC",
+  "numeroDocumento": "100000001",
+  "fechaNacimiento": "1995-04-20",
+  "celular": "3000000000",
+  "municipio": "Turbo",
+  "direccion": "Dato ficticio para demostracion"
+}
+
+### 2.1 Registrar consentimiento para tratamiento de datos
+PATCH {{baseUrl}}/beneficiarios/1/consentimiento
+Authorization: {{auth}}
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+
+{
+  "version": 0,
+  "estado": "OTORGADO",
+  "motivo": "Consentimiento ficticio de demostracion"
+}
+
+### 2.2 Crear familia
+POST {{baseUrl}}/familias
+Authorization: {{auth}}
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+
+{
+  "nombre": "Familia Demostracion",
+  "direccion": "Dato ficticio",
+  "municipio": "Turbo"
+}
+
+### 2.3 Vincular beneficiario con la familia
+POST {{baseUrl}}/integrantes-familia
+Authorization: {{auth}}
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+
+{
+  "idFamilia": 1,
+  "idBeneficiario": 1,
+  "parentesco": "MADRE"
+}
+
+### 3. Crear programa con linea de intervencion
+POST {{baseUrl}}/programas
+Authorization: {{auth}}
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+
+{
+  "nombre": "Programa Demostracion",
+  "lineaIntervencion": "ASISTENCIA HUMANITARIA Y PROTECCION",
+  "descripcion": "Programa ficticio para la demostracion"
+}
+
+### 3.1 Vincular beneficiario al programa
+POST {{baseUrl}}/participaciones
+Authorization: {{auth}}
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+
+{
+  "idBeneficiario": 1,
+  "idPrograma": 1,
+  "periodo": "2026",
+  "fechaIngreso": "2026-09-18",
+  "estadoParticipacion": "INSCRITO",
+  "observaciones": "Vinculacion inicial"
+}
+
+### 4. Registrar atencion o ayuda con la evidencia minima de la guia
+POST {{baseUrl}}/atenciones
+Authorization: {{auth}}
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+Idempotency-Key: demo-atencion-0001
+
+{
+  "idParticipacion": 1,
+  "fechaAtencion": "2026-09-18",
+  "tipoAtencion": "AYUDA",
+  "descripcion": "Entrega de apoyo ficticio",
+  "responsable": "Equipo de atencion",
+  "resultado": "Ayuda entregada",
+  "remision": "No aplica",
+  "observaciones": "Caso ficticio para demostracion"
+}
+
+### 5. Registrar seguimiento con avance/novedad y accion pendiente
+POST {{baseUrl}}/seguimientos
+Authorization: {{auth}}
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+Idempotency-Key: demo-seguimiento-0001
+
+{
+  "idParticipacion": 1,
+  "fechaSeguimiento": "2026-09-18",
+  "fechaProximoSeguimiento": "2026-10-18",
+  "estadoSeguimiento": "PENDIENTE",
+  "avanceNovedad": "Se confirma avance en el proceso",
+  "accionPendiente": "Realizar llamada de verificacion",
+  "observaciones": "Seguimiento ficticio"
+}
+
+### 6. Consultar ficha consolidada: persona, familia, programa, atenciones y seguimientos
+GET {{baseUrl}}/beneficiarios/1/historial
+Authorization: {{auth}}
+
+### 7. Consultar indicadores agregados sin datos personales
+GET {{baseUrl}}/reportes/resumen
+Authorization: {{auth}}

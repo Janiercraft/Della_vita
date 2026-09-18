@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Run ProyectoApplication",
+      "request": "launch",
+      "mainClass": "com.proyecto.ProyectoApplication",
+      "projectName": "gestion-beneficiarios",
+      "preLaunchTask": "Preparar PostgreSQL local",
+      "env": {
+        "SPRING_PROFILES_ACTIVE": "local",
+        "SPRING_DATASOURCE_URL": "jdbc:postgresql://127.0.0.1:15432/beneficiarios?sslmode=disable",
+        "SPRING_DATASOURCE_USERNAME": "beneficiarios",
+        "SPRING_DATASOURCE_PASSWORD": "123"
+      }
+    }
+  ]
+}

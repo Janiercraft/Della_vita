@@ -1,0 +1,60 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+
+server:
+  address: 0.0.0.0
+  port: ${PORT:10000}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+application:
+  api:
+    path: /api/v1
+
+  admin:
+    usuario: ${ADMIN_USER:administrador}
+    clave: ${ADMIN_PASSWORD}
+
+  importacion:
+    max-filas: 10000
+
+  cors:
+    origenes: ${CORS_ORIGINS:*}
+
+logging:
+  pattern:
+    level: '%5p [solicitud:%X{solicitudId}]'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

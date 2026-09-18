@@ -1,0 +1,50 @@
+### Crear funcionario de Turbo - ejecutar como ADMIN
+POST http://localhost:8080/api/v1/usuarios
+Authorization: Basic administrador aguapanela12
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+
+{
+  "nombreUsuario": "funcionario.turbo",
+  "nombreCompleto": "Funcionario Turbo",
+  "clave": "Funcionario123",
+  "rol": "OPERADOR",
+  "municipioAsignado": "Turbo",
+  "idBeneficiario": null
+}
+
+### Consentimiento - ADMIN u OPERADOR autorizado
+PATCH http://localhost:8080/api/v1/beneficiarios/1/consentimiento
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+
+{
+  "version": 0,
+  "estado": "OTORGADO",
+  "motivo": "Consentimiento informado registrado"
+}
+
+### Ver duplicidades - ADMIN
+GET http://localhost:8080/api/v1/duplicidades
+
+### Resolver duplicidad - ADMIN
+POST http://localhost:8080/api/v1/duplicidades/2/resolver
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+
+{
+  "version": 0,
+  "accion": "ACEPTAR",
+  "motivo": "Persona distinta confirmada por coordinación"
+}
+
+### Validar ayuda - ADMIN
+PATCH http://localhost:8080/api/v1/atenciones/1/validacion-ayuda
+Content-Type: application/json
+X-Requested-With: gestion-beneficiarios
+
+{
+  "version": 0,
+  "estado": "VALIDADA",
+  "motivo": "Entrega revisada y aprobada"
+}

@@ -1,0 +1,1629 @@
+{
+  "info": {
+    "name": "Gestion de beneficiarios",
+    "description": "Configura baseUrl, usuario y clave. Ejecuta los CRUD por orden segun relaciones. No ejecutes la coleccion completa indiscriminadamente: incluye desactivaciones y unificaciones. Para las importaciones selecciona un archivo. Fechas e IDs son ejemplos que debes ajustar.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{usuario}}",
+        "type": "string"
+      },
+      {
+        "key": "password",
+        "value": "{{clave}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "usuario",
+      "value": "administrador"
+    },
+    {
+      "key": "clave",
+      "value": ""
+    },
+    {
+      "key": "beneficiariosId",
+      "value": "1"
+    },
+    {
+      "key": "beneficiariosVersion",
+      "value": "0"
+    },
+    {
+      "key": "programasId",
+      "value": "1"
+    },
+    {
+      "key": "programasVersion",
+      "value": "0"
+    },
+    {
+      "key": "participacionesId",
+      "value": "1"
+    },
+    {
+      "key": "participacionesVersion",
+      "value": "0"
+    },
+    {
+      "key": "atencionesId",
+      "value": "1"
+    },
+    {
+      "key": "atencionesVersion",
+      "value": "0"
+    },
+    {
+      "key": "seguimientosId",
+      "value": "1"
+    },
+    {
+      "key": "seguimientosVersion",
+      "value": "0"
+    },
+    {
+      "key": "familiasId",
+      "value": "1"
+    },
+    {
+      "key": "familiasVersion",
+      "value": "0"
+    },
+    {
+      "key": "integrantes-familiaId",
+      "value": "1"
+    },
+    {
+      "key": "integrantes-familiaVersion",
+      "value": "0"
+    },
+    {
+      "key": "catalogosId",
+      "value": "1"
+    },
+    {
+      "key": "catalogosVersion",
+      "value": "0"
+    },
+    {
+      "key": "usuariosId",
+      "value": "1"
+    },
+    {
+      "key": "usuariosVersion",
+      "value": "0"
+    },
+    {
+      "key": "importacionId",
+      "value": "1"
+    },
+    {
+      "key": "filaId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "beneficiarios",
+      "item": [
+        {
+          "name": "Guardar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/beneficiarios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"primerNombre\": \"Ana\",\n  \"primerApellido\": \"Prueba\",\n  \"municipio\": \"Bogota\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('beneficiariosId', resultado.id); pm.collectionVariables.set('beneficiariosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/beneficiarios?pagina=0&tamanio=20"
+          }
+        },
+        {
+          "name": "Consultar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/beneficiarios/{{beneficiariosId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('beneficiariosId', resultado.id); pm.collectionVariables.set('beneficiariosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/beneficiarios/{{beneficiariosId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"primerNombre\": \"Ana\",\n  \"primerApellido\": \"Prueba\",\n  \"municipio\": \"Bogota\",\n  \"version\": {{beneficiariosVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('beneficiariosId', resultado.id); pm.collectionVariables.set('beneficiariosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desactivar o anular",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/beneficiarios/{{beneficiariosId}}/estado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": false,\n  \"version\": {{beneficiariosVersion}},\n  \"motivo\": \"Retiro solicitado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('beneficiariosId', resultado.id); pm.collectionVariables.set('beneficiariosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "programas",
+      "item": [
+        {
+          "name": "Guardar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/programas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Programa de orientacion\",\n  \"descripcion\": \"Atencion y seguimiento\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('programasId', resultado.id); pm.collectionVariables.set('programasVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/programas?pagina=0&tamanio=20"
+          }
+        },
+        {
+          "name": "Consultar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/programas/{{programasId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('programasId', resultado.id); pm.collectionVariables.set('programasVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/programas/{{programasId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Programa de orientacion\",\n  \"descripcion\": \"Atencion y seguimiento\",\n  \"version\": {{programasVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('programasId', resultado.id); pm.collectionVariables.set('programasVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desactivar o anular",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/programas/{{programasId}}/estado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": false,\n  \"version\": {{programasVersion}},\n  \"motivo\": \"Retiro solicitado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('programasId', resultado.id); pm.collectionVariables.set('programasVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "participaciones",
+      "item": [
+        {
+          "name": "Guardar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/participaciones",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idBeneficiario\": {{beneficiariosId}},\n  \"idPrograma\": {{programasId}},\n  \"periodo\": \"2026\",\n  \"fechaIngreso\": \"2026-09-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('participacionesId', resultado.id); pm.collectionVariables.set('participacionesVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/participaciones?pagina=0&tamanio=20"
+          }
+        },
+        {
+          "name": "Consultar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/participaciones/{{participacionesId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('participacionesId', resultado.id); pm.collectionVariables.set('participacionesVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/participaciones/{{participacionesId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idBeneficiario\": {{beneficiariosId}},\n  \"idPrograma\": {{programasId}},\n  \"periodo\": \"2026\",\n  \"fechaIngreso\": \"2026-09-17\",\n  \"version\": {{participacionesVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('participacionesId', resultado.id); pm.collectionVariables.set('participacionesVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desactivar o anular",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/participaciones/{{participacionesId}}/estado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": false,\n  \"version\": {{participacionesVersion}},\n  \"motivo\": \"Retiro solicitado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('participacionesId', resultado.id); pm.collectionVariables.set('participacionesVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "atenciones",
+      "item": [
+        {
+          "name": "Guardar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/atenciones",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idParticipacion\": {{participacionesId}},\n  \"fechaAtencion\": \"2026-09-17\",\n  \"tipoAtencion\": \"Orientacion\",\n  \"observaciones\": \"Primera atencion\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('atencionesId', resultado.id); pm.collectionVariables.set('atencionesVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/atenciones?pagina=0&tamanio=20"
+          }
+        },
+        {
+          "name": "Consultar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/atenciones/{{atencionesId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('atencionesId', resultado.id); pm.collectionVariables.set('atencionesVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/atenciones/{{atencionesId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idParticipacion\": {{participacionesId}},\n  \"fechaAtencion\": \"2026-09-17\",\n  \"tipoAtencion\": \"Orientacion\",\n  \"observaciones\": \"Primera atencion\",\n  \"version\": {{atencionesVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('atencionesId', resultado.id); pm.collectionVariables.set('atencionesVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desactivar o anular",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/atenciones/{{atencionesId}}/estado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": false,\n  \"version\": {{atencionesVersion}},\n  \"motivo\": \"Retiro solicitado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('atencionesId', resultado.id); pm.collectionVariables.set('atencionesVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "seguimientos",
+      "item": [
+        {
+          "name": "Guardar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/seguimientos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idParticipacion\": {{participacionesId}},\n  \"fechaSeguimiento\": \"2026-09-17\",\n  \"estadoSeguimiento\": \"PENDIENTE\",\n  \"observaciones\": \"Programar visita\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('seguimientosId', resultado.id); pm.collectionVariables.set('seguimientosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/seguimientos?pagina=0&tamanio=20"
+          }
+        },
+        {
+          "name": "Consultar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/seguimientos/{{seguimientosId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('seguimientosId', resultado.id); pm.collectionVariables.set('seguimientosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/seguimientos/{{seguimientosId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idParticipacion\": {{participacionesId}},\n  \"fechaSeguimiento\": \"2026-09-17\",\n  \"estadoSeguimiento\": \"PENDIENTE\",\n  \"observaciones\": \"Programar visita\",\n  \"version\": {{seguimientosVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('seguimientosId', resultado.id); pm.collectionVariables.set('seguimientosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desactivar o anular",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/seguimientos/{{seguimientosId}}/estado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": false,\n  \"version\": {{seguimientosVersion}},\n  \"motivo\": \"Retiro solicitado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('seguimientosId', resultado.id); pm.collectionVariables.set('seguimientosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "familias",
+      "item": [
+        {
+          "name": "Guardar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/familias",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Familia de prueba\",\n  \"municipio\": \"Bogota\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('familiasId', resultado.id); pm.collectionVariables.set('familiasVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/familias?pagina=0&tamanio=20"
+          }
+        },
+        {
+          "name": "Consultar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/familias/{{familiasId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('familiasId', resultado.id); pm.collectionVariables.set('familiasVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/familias/{{familiasId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Familia de prueba\",\n  \"municipio\": \"Bogota\",\n  \"version\": {{familiasVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('familiasId', resultado.id); pm.collectionVariables.set('familiasVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desactivar o anular",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/familias/{{familiasId}}/estado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": false,\n  \"version\": {{familiasVersion}},\n  \"motivo\": \"Retiro solicitado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('familiasId', resultado.id); pm.collectionVariables.set('familiasVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "integrantes-familia",
+      "item": [
+        {
+          "name": "Guardar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/integrantes-familia",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idFamilia\": {{familiasId}},\n  \"idBeneficiario\": {{beneficiariosId}},\n  \"parentesco\": \"TITULAR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('integrantes-familiaId', resultado.id); pm.collectionVariables.set('integrantes-familiaVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/integrantes-familia?pagina=0&tamanio=20"
+          }
+        },
+        {
+          "name": "Consultar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/integrantes-familia/{{integrantes-familiaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('integrantes-familiaId', resultado.id); pm.collectionVariables.set('integrantes-familiaVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/integrantes-familia/{{integrantes-familiaId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idFamilia\": {{familiasId}},\n  \"idBeneficiario\": {{beneficiariosId}},\n  \"parentesco\": \"TITULAR\",\n  \"version\": {{integrantes-familiaVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('integrantes-familiaId', resultado.id); pm.collectionVariables.set('integrantes-familiaVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desactivar o anular",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/integrantes-familia/{{integrantes-familiaId}}/estado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": false,\n  \"version\": {{integrantes-familiaVersion}},\n  \"motivo\": \"Retiro solicitado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('integrantes-familiaId', resultado.id); pm.collectionVariables.set('integrantes-familiaVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "catalogos",
+      "item": [
+        {
+          "name": "Guardar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/catalogos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"TIPO_ATENCION\",\n  \"codigo\": \"ORIENTACION\",\n  \"nombre\": \"Orientacion\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('catalogosId', resultado.id); pm.collectionVariables.set('catalogosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/catalogos?pagina=0&tamanio=20"
+          }
+        },
+        {
+          "name": "Consultar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/catalogos/{{catalogosId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('catalogosId', resultado.id); pm.collectionVariables.set('catalogosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/catalogos/{{catalogosId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"TIPO_ATENCION\",\n  \"codigo\": \"ORIENTACION\",\n  \"nombre\": \"Orientacion\",\n  \"version\": {{catalogosVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('catalogosId', resultado.id); pm.collectionVariables.set('catalogosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desactivar o anular",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/catalogos/{{catalogosId}}/estado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": false,\n  \"version\": {{catalogosVersion}},\n  \"motivo\": \"Retiro solicitado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('catalogosId', resultado.id); pm.collectionVariables.set('catalogosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "usuarios",
+      "item": [
+        {
+          "name": "Guardar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/usuarios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreUsuario\": \"operador.demo\",\n  \"nombreCompleto\": \"Operador de demostracion\",\n  \"rol\": \"OPERADOR\",\n  \"clave\": \"ConfiguraUnaClavePropia123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('usuariosId', resultado.id); pm.collectionVariables.set('usuariosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/usuarios?pagina=0&tamanio=20"
+          }
+        },
+        {
+          "name": "Consultar por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/usuarios/{{usuariosId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('usuariosId', resultado.id); pm.collectionVariables.set('usuariosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/usuarios/{{usuariosId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreUsuario\": \"operador.demo\",\n  \"nombreCompleto\": \"Operador de demostracion\",\n  \"rol\": \"OPERADOR\",\n  \"version\": {{usuariosVersion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('usuariosId', resultado.id); pm.collectionVariables.set('usuariosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Desactivar o anular",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/usuarios/{{usuariosId}}/estado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": false,\n  \"version\": {{usuariosVersion}},\n  \"motivo\": \"Retiro solicitado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resultado = pm.response.json().datos;",
+                  "if (resultado && resultado.id) { pm.collectionVariables.set('usuariosId', resultado.id); pm.collectionVariables.set('usuariosVersion', resultado.version); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Importaciones",
+      "item": [
+        {
+          "name": "Cargar CSV o Excel y procesar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/importaciones",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "archivo",
+                  "type": "file",
+                  "src": null,
+                  "description": "Selecciona el archivo CSV, XLSX o XLS"
+                },
+                {
+                  "key": "configuracion",
+                  "type": "text",
+                  "contentType": "application/json",
+                  "value": "{\"mapeo\": {\"primerNombre\": \"Nombre\", \"primerApellido\": \"Apellido\", \"tipoDocumento\": \"Tipo\", \"numeroDocumento\": \"Documento\", \"municipio\": \"Municipio\"}, \"separador\": \",\", \"hoja\": 0}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const datos = pm.response.json().datos; if (datos) pm.collectionVariables.set('importacionId', datos.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Resumen",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/importaciones/{{importacionId}}"
+          }
+        },
+        {
+          "name": "Filas duplicadas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/importaciones/{{importacionId}}/filas?estado=DUPLICADO"
+          }
+        },
+        {
+          "name": "Filas pendientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/importaciones/{{importacionId}}/filas?estado=PENDIENTE"
+          }
+        },
+        {
+          "name": "Reporte completo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/importaciones/{{importacionId}}/reporte"
+          }
+        },
+        {
+          "name": "Reporte duplicados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/importaciones/{{importacionId}}/reporte?soloDuplicados=true"
+          }
+        },
+        {
+          "name": "Confirmar o reanudar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/importaciones/{{importacionId}}/confirmar"
+          }
+        },
+        {
+          "name": "Resolver coincidencia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/importaciones/{{importacionId}}/filas/{{filaId}}/resolver",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accion\": \"VINCULAR\",\n  \"idBeneficiario\": {{beneficiariosId}},\n  \"motivo\": \"Identidad verificada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Historial y auditoria",
+      "item": [
+        {
+          "name": "Historial del beneficiario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/beneficiarios/{{beneficiariosId}}/historial"
+          }
+        },
+        {
+          "name": "Resumen historico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/reportes/resumen"
+          }
+        },
+        {
+          "name": "Auditoria",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auditorias?entidad=Beneficiario&idRegistro={{beneficiariosId}}"
+          }
+        },
+        {
+          "name": "Unificar fichas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Requested-With",
+                "value": "gestion-beneficiarios"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/beneficiarios/unificar",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idOrigen\": 2,\n  \"idDestino\": 1,\n  \"versionOrigen\": 0,\n  \"versionDestino\": 0,\n  \"motivo\": \"Identidad verificada presencialmente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

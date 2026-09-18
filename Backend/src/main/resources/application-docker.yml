@@ -1,0 +1,32 @@
+# Perfil usado cuando backend y PostgreSQL corren con Docker Compose.
+# IMPORTANTE: dentro de Docker NO se usa localhost para PostgreSQL.
+server:
+  address: 0.0.0.0
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://${DB_HOST:database}:${DB_PORT:5432}/${DB_NAME:beneficiarios}?sslmode=disable}
+    username: ${DB_USER:beneficiarios}
+    password: ${DB_PASSWORD:123}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 10000
+      validation-timeout: 5000
+      initialization-fail-timeout: 30000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    connect-retries: 10
+    connect-retries-interval: 2
+
+application:
+  admin:
+    usuario: ${ADMIN_USER:administrador}
+    clave: ${ADMIN_PASSWORD:aguapanela12}
+  cors:
+    origenes: ${CORS_ORIGINS:http://localhost:3000}
