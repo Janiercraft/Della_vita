@@ -21,7 +21,10 @@ public class FiltroSolicitudApi extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain cadena)
             throws ServletException, IOException {
-        if (!Set.of("GET", "HEAD", "OPTIONS").contains(request.getMethod())
+        boolean esLogin = request.getRequestURI().endsWith("/api/v1/auth/login")
+                || request.getRequestURI().endsWith("/auth/login");
+        if (!esLogin
+                && !Set.of("GET", "HEAD", "OPTIONS").contains(request.getMethod())
                 && !"gestion-beneficiarios".equals(request.getHeader("X-Requested-With"))) {
             response.setStatus(403);
             response.setContentType("application/json;charset=UTF-8");

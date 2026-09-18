@@ -36,6 +36,8 @@ public class AsistenteIaServiceImpl implements AsistenteIaService {
                     + "No inventes datos ni cantidades. Si el contexto no permite responder, indicalo. "
                     + "No emitas diagnosticos medicos, psicologicos o juridicos. "
                     + "No decidas quien debe recibir una ayuda o servicio. "
+                    + "Responde siempre en texto plano. No uses Markdown, asteriscos, negritas, cursivas, encabezados con #, bloques de codigo ni listas con simbolos como * o -. "
+                    + "Si necesitas enumerar informacion, usa frases separadas por saltos de linea o numeracion simple como 1., 2., 3. "
                     + "Tus respuestas son apoyo para consulta y seguimiento, no decisiones institucionales.";
 
     @Override

@@ -38,6 +38,9 @@ public class Atencion extends RegistroAuditable {
     @Column(name = "observaciones", nullable = true, length = 2000)
     private String observaciones;
 
+    @Column(name = "estado_atencion", length = 100)
+    private String estadoAtencion;
+
     @Column(nullable = false, unique = true, length = 100)
     @com.fasterxml.jackson.annotation.JsonIgnore
     private String claveIdempotencia;

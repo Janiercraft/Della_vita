@@ -72,6 +72,12 @@ public class ManejadorExcepciones {
                                 null));
     }
 
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<?> autenticacion(Exception error) {
+        return ResponseEntity.status(401)
+                .body(RespuestaDto.correcta("Usuario o clave incorrectos", null));
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> permisos(Exception error) {
         return ResponseEntity.status(403)

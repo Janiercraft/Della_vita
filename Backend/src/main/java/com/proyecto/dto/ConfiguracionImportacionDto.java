@@ -13,12 +13,12 @@ import java.util.Map;
 @AllArgsConstructor
 public class ConfiguracionImportacionDto {
     // Clave = campo del sistema, valor = encabezado del archivo.
-    @NotEmpty(message = "Falta mapeo de columnas")
-    private Map<String, String> mapeo;
+    @Builder.Default
+    private Map<String, String> mapeo = new java.util.LinkedHashMap<>();
 
     @Builder.Default
     @NotBlank
-    @Pattern(regexp = "[,;|\\t]")
+    @Pattern(regexp = "AUTO|[,;|\\t]")
     private String separador = ",";
 
     @Builder.Default

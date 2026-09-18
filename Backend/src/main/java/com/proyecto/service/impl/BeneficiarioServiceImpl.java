@@ -238,6 +238,15 @@ public class BeneficiarioServiceImpl implements BeneficiarioService {
         registro.setCelular(Normalizador.texto(dto.getCelular()));
         registro.setMunicipio(Normalizador.texto(dto.getMunicipio()));
         registro.setDireccion(Normalizador.texto(dto.getDireccion()));
+        registro.setCodigoOrigen(Normalizador.texto(dto.getCodigoOrigen()));
+        registro.setNombreCompletoOriginal(Normalizador.texto(dto.getNombreCompletoOriginal()));
+        registro.setSexo(Normalizador.texto(dto.getSexo()));
+        registro.setEdad(dto.getEdad());
+        registro.setZona(Normalizador.texto(dto.getZona()));
+        registro.setNacionalidad(Normalizador.texto(dto.getNacionalidad()));
+        registro.setTipoPoblacion(Normalizador.texto(dto.getTipoPoblacion()));
+        registro.setOrganizacionOrigen(Normalizador.texto(dto.getOrganizacionOrigen()));
+        registro.setFechaRegistroOrigen(dto.getFechaRegistroOrigen());
         String nombreCompleto =
                 String.join(
                         " ",
@@ -267,6 +276,15 @@ public class BeneficiarioServiceImpl implements BeneficiarioService {
         dto.setCelular(registro.getCelular());
         dto.setMunicipio(registro.getMunicipio());
         dto.setDireccion(registro.getDireccion());
+        dto.setCodigoOrigen(registro.getCodigoOrigen());
+        dto.setNombreCompletoOriginal(registro.getNombreCompletoOriginal());
+        dto.setSexo(registro.getSexo());
+        dto.setEdad(registro.getEdad());
+        dto.setZona(registro.getZona());
+        dto.setNacionalidad(registro.getNacionalidad());
+        dto.setTipoPoblacion(registro.getTipoPoblacion());
+        dto.setOrganizacionOrigen(registro.getOrganizacionOrigen());
+        dto.setFechaRegistroOrigen(registro.getFechaRegistroOrigen());
         dto.setCodigoInterno(registro.getCodigoInterno());
         dto.setIdBeneficiarioPrincipal(registro.getIdBeneficiarioPrincipal());
         dto.setEstadoRevisionDuplicidad(registro.getEstadoRevisionDuplicidad());

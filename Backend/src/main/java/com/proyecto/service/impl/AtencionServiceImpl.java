@@ -196,6 +196,7 @@ public class AtencionServiceImpl implements AtencionService {
         registro.setResultado(Normalizador.texto(dto.getResultado()));
         registro.setRemision(Normalizador.texto(dto.getRemision()));
         registro.setObservaciones(Normalizador.texto(dto.getObservaciones()));
+        registro.setEstadoAtencion(Normalizador.texto(dto.getEstadoAtencion()));
     }
 
     public AtencionDto convertirADto(Atencion registro) {
@@ -215,6 +216,7 @@ public class AtencionServiceImpl implements AtencionService {
         dto.setResultado(registro.getResultado());
         dto.setRemision(registro.getRemision());
         dto.setObservaciones(registro.getObservaciones());
+        dto.setEstadoAtencion(registro.getEstadoAtencion());
         dto.setEstadoValidacionAyuda(registro.getEstadoValidacionAyuda());
         return dto;
     }

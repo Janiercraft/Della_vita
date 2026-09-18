@@ -37,10 +37,11 @@ public class LectorCsvServiceImpl implements LectorArchivoService {
             if (texto.startsWith("\uFEFF")) {
                 texto = texto.substring(1);
             }
+            char separador = detectarSeparador(texto, configuracion.getSeparador());
             CSVFormat formato =
                     CSVFormat.DEFAULT
                             .builder()
-                            .setDelimiter(configuracion.getSeparador().charAt(0))
+                            .setDelimiter(separador)
                             .setHeader()
                             .setSkipHeaderRecord(true)
                             .setIgnoreEmptyLines(false)
@@ -71,6 +72,30 @@ public class LectorCsvServiceImpl implements LectorArchivoService {
             throw ExcepcionNegocio.invalido(
                     "CSV invalido: use UTF-8, encabezados unicos y el separador configurado");
         }
+    }
+
+    private char detectarSeparador(String texto, String configurado) {
+        if (configurado != null && !configurado.equalsIgnoreCase("AUTO")) {
+            return configurado.charAt(0);
+        }
+        String primera = texto.lines().findFirst().orElse("");
+        char[] candidatos = new char[] {',', ';', '\t', '|'};
+        char mejor = ',';
+        int max = -1;
+        for (char candidato : candidatos) {
+            int conteo = 0;
+            boolean comillas = false;
+            for (int i = 0; i < primera.length(); i++) {
+                char c = primera.charAt(i);
+                if (c == '"') comillas = !comillas;
+                else if (!comillas && c == candidato) conteo++;
+            }
+            if (conteo > max) {
+                max = conteo;
+                mejor = candidato;
+            }
+        }
+        return mejor;
     }
 
     public static void validarEncabezados(

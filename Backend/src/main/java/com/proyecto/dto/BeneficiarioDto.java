@@ -51,6 +51,34 @@ public class BeneficiarioDto {
     @Size(max = 250)
     private String direccion;
 
+    @Size(max = 100)
+    private String codigoOrigen;
+
+    @Size(max = 450)
+    private String nombreCompletoOriginal;
+
+    @Size(max = 50)
+    private String sexo;
+
+    @Min(0)
+    @Max(130)
+    private Integer edad;
+
+    @Size(max = 100)
+    private String zona;
+
+    @Size(max = 100)
+    private String nacionalidad;
+
+    @Size(max = 150)
+    private String tipoPoblacion;
+
+    @Size(max = 200)
+    private String organizacionOrigen;
+
+    @PastOrPresent
+    private LocalDate fechaRegistroOrigen;
+
     private String codigoInterno;
     private Long idBeneficiarioPrincipal;
     private String estadoRevisionDuplicidad;

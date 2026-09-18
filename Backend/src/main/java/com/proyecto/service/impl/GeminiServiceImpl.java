@@ -88,13 +88,43 @@ public class GeminiServiceImpl implements GeminiService {
             if (textoRespuesta.isMissingNode() || textoRespuesta.asText().isBlank()) {
                 throw new IllegalStateException("Gemini no genero una respuesta util");
             }
-            return textoRespuesta.asText().trim();
+            return limpiarFormatoMarkdown(textoRespuesta.asText());
         } catch (ExcepcionNegocio error) {
             throw error;
         } catch (Exception error) {
             log.warn("No fue posible completar la consulta con Gemini, tipo={}", error.getClass().getSimpleName());
             throw new IllegalStateException("No fue posible consultar el asistente IA en este momento");
         }
+    }
+
+    /**
+     * Convierte la salida generada por Gemini a texto plano para que el frontend no muestre
+     * marcadores de Markdown como **, *, # o ``` de forma literal.
+     */
+    private String limpiarFormatoMarkdown(String texto) {
+        if (texto == null || texto.isBlank()) {
+            return "";
+        }
+
+        String limpio = texto.replace("\r\n", "\n").replace('\r', '\n');
+
+        // Elimina bloques/cercas de codigo y encabezados Markdown.
+        limpio = limpio.replace("```", "");
+        limpio = limpio.replaceAll("(?m)^\\s*#{1,6}\\s*", "");
+
+        // Convierte listas Markdown a una numeracion/viñeta limpia y elimina marcadores de formato.
+        limpio = limpio.replaceAll("(?m)^\\s*[-+]\\s+", "• " );
+        limpio = limpio.replaceAll("(?m)^\\s*\\*\\s+", "• " );
+        limpio = limpio.replace("**", "");
+        limpio = limpio.replace("__", "");
+        limpio = limpio.replace("*", "");
+        limpio = limpio.replace("`", "");
+
+        // Evita espacios excesivos sin eliminar los saltos de linea utiles.
+        limpio = limpio.replaceAll("[ \t]+(?=\n)", "");
+        limpio = limpio.replaceAll("\n{3,}", "\n\n");
+
+        return limpio.trim();
     }
 
     private String convertirContextoAJson(Object contexto) {

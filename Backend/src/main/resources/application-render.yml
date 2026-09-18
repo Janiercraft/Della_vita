@@ -45,6 +45,9 @@ application:
 
   cors:
     origenes: ${CORS_ORIGINS:*}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiracion-minutos: ${JWT_EXPIRATION_MINUTES:120}
 
 logging:
   pattern:

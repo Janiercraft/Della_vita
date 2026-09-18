@@ -7,7 +7,7 @@ server:
 spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://${DB_HOST:database}:${DB_PORT:5432}/${DB_NAME:beneficiarios}?sslmode=disable}
-    username: ${DB_USER:beneficiarios}
+    username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:123}
     driver-class-name: org.postgresql.Driver
     hikari:
@@ -30,3 +30,6 @@ application:
     clave: ${ADMIN_PASSWORD:aguapanela12}
   cors:
     origenes: ${CORS_ORIGINS:http://localhost:3000}
+  jwt:
+    secret: ${JWT_SECRET:desarrollo-jwt-secret-uraba-pais-2026-cambiar-produccion-123456789}
+    expiracion-minutos: ${JWT_EXPIRATION_MINUTES:120}

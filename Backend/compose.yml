@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: ${DB_USER:-beneficiarios}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-123}
     ports:
-      - "127.0.0.1:15432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - datos_postgres:/var/lib/postgresql/data
     networks:
@@ -35,7 +35,7 @@ services:
       DB_PORT: 5432
       DB_NAME: beneficiarios
       DB_URL: jdbc:postgresql://database:5432/beneficiarios?sslmode=disable
-      DB_USER: ${DB_USER:-beneficiarios}
+      DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-123}
       ADMIN_USER: ${ADMIN_USER:-administrador}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-aguapanela12}

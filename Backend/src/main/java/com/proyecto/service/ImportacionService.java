@@ -10,6 +10,10 @@ public interface ImportacionService {
     ImportacionDto cargar(
             MultipartFile archivo, ConfiguracionImportacionDto configuracion, boolean confirmar);
 
+    ImportacionDto cargarAutomatico(MultipartFile archivo, boolean confirmar, int hoja, String separador);
+
+    AnalisisColumnasImportacionDto analizar(MultipartFile archivo, int hoja, String separador);
+
     ImportacionDto confirmar(Long id);
 
     ImportacionDto consultar(Long id);

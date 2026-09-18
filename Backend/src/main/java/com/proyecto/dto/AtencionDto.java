@@ -47,5 +47,8 @@ public class AtencionDto {
     @Size(max = 2000)
     private String observaciones;
 
+    @Size(max = 100)
+    private String estadoAtencion;
+
     private String estadoValidacionAyuda;
 }

@@ -6,6 +6,7 @@ import com.proyecto.model.*;
 import com.proyecto.repository.*;
 import com.proyecto.service.*;
 import com.proyecto.util.Paginacion;
+import com.proyecto.util.MapeoColumnasImportacion;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class ImportacionServiceImpl implements ImportacionService {
     private final ProcesamientoFilaService procesamientoService;
     private final ImportacionRepository importacionRepository;
     private final FilaImportacionRepository filaRepository;
+    private final List<LectorArchivoService> lectores;
 
     @Override
     public ImportacionDto cargar(
@@ -40,6 +42,43 @@ public class ImportacionServiceImpl implements ImportacionService {
                 return confirmar(id);
             }
             return consultar(id);
+        } catch (IOException error) {
+            throw ExcepcionNegocio.invalido("No se pudo leer el archivo");
+        }
+    }
+
+    @Override
+    public ImportacionDto cargarAutomatico(MultipartFile archivo, boolean confirmar, int hoja, String separador) {
+        ConfiguracionImportacionDto config = ConfiguracionImportacionDto.builder()
+                .mapeo(new LinkedHashMap<>())
+                .hoja(hoja)
+                .separador(separador == null || separador.isBlank() ? "AUTO" : separador)
+                .build();
+        return cargar(archivo, config, confirmar);
+    }
+
+    @Override
+    public AnalisisColumnasImportacionDto analizar(MultipartFile archivo, int hoja, String separador) {
+        try {
+            String nombre = archivo.getOriginalFilename();
+            ConfiguracionImportacionDto config = ConfiguracionImportacionDto.builder()
+                    .mapeo(new LinkedHashMap<>())
+                    .hoja(hoja)
+                    .separador(separador == null || separador.isBlank() ? "AUTO" : separador)
+                    .build();
+            LectorArchivoService lector = lectores.stream().filter(l -> l.soporta(nombre)).findFirst()
+                    .orElseThrow(() -> ExcepcionNegocio.invalido("Formato no soportado: use CSV, XLSX o XLS"));
+            List<Map<String, String>> filas = lector.leer(archivo.getBytes(), config);
+            if (filas.isEmpty()) throw ExcepcionNegocio.invalido("El archivo no contiene filas de datos");
+            List<String> columnas = filas.getFirst().keySet().stream().filter(k -> !k.startsWith("__")).toList();
+            Map<String, String> mapeo = MapeoColumnasImportacion.detectar(columnas);
+            return AnalisisColumnasImportacionDto.builder()
+                    .archivo(nombre)
+                    .columnasDetectadas(columnas)
+                    .mapeoDetectado(mapeo)
+                    .derivados(MapeoColumnasImportacion.derivados())
+                    .columnasNoReconocidas(MapeoColumnasImportacion.noReconocidas(columnas, mapeo))
+                    .build();
         } catch (IOException error) {
             throw ExcepcionNegocio.invalido("No se pudo leer el archivo");
         }

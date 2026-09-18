@@ -44,6 +44,33 @@ public class Beneficiario extends RegistroAuditable {
     @Column(name = "direccion", nullable = true, length = 250)
     private String direccion;
 
+    @Column(name = "codigo_origen", length = 100)
+    private String codigoOrigen;
+
+    @Column(name = "nombre_completo_original", length = 450)
+    private String nombreCompletoOriginal;
+
+    @Column(name = "sexo", length = 50)
+    private String sexo;
+
+    @Column(name = "edad")
+    private Integer edad;
+
+    @Column(name = "zona", length = 100)
+    private String zona;
+
+    @Column(name = "nacionalidad", length = 100)
+    private String nacionalidad;
+
+    @Column(name = "tipo_poblacion", length = 150)
+    private String tipoPoblacion;
+
+    @Column(name = "organizacion_origen", length = 200)
+    private String organizacionOrigen;
+
+    @Column(name = "fecha_registro_origen")
+    private LocalDate fechaRegistroOrigen;
+
     @Column(nullable = false, unique = true, length = 40)
     private String codigoInterno;
 

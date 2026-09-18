@@ -35,6 +35,9 @@ application:
     path: /api/v1
   importacion:
     max-filas: 10000
+  jwt:
+    secret: ${JWT_SECRET:desarrollo-jwt-secret-uraba-pais-2026-cambiar-produccion-123456789}
+    expiracion-minutos: ${JWT_EXPIRATION_MINUTES:120}
   gemini:
     api-key: ${GEMINI_API_KEY:}
     modelo: ${GEMINI_MODEL:gemini-3.6-flash}

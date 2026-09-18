@@ -31,6 +31,28 @@ public class ImportacionController {
                                 servicio.cargar(archivo, configuracion, confirmar)));
     }
 
+    @PostMapping(value = "/auto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> cargarAutomatico(
+            @RequestPart MultipartFile archivo,
+            @RequestParam(defaultValue = "true") boolean confirmar,
+            @RequestParam(defaultValue = "0") int hoja,
+            @RequestParam(defaultValue = "AUTO") String separador) {
+        return ResponseEntity.status(201)
+                .body(RespuestaDto.correcta(
+                        "Carga automatica procesada; las columnas fueron detectadas por nombre",
+                        servicio.cargarAutomatico(archivo, confirmar, hoja, separador)));
+    }
+
+    @PostMapping(value = "/analizar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public RespuestaDto<?> analizar(
+            @RequestPart MultipartFile archivo,
+            @RequestParam(defaultValue = "0") int hoja,
+            @RequestParam(defaultValue = "AUTO") String separador) {
+        return RespuestaDto.correcta(
+                "Columnas analizadas sin guardar registros",
+                servicio.analizar(archivo, hoja, separador));
+    }
+
     @PostMapping("/{id}/confirmar")
     public RespuestaDto<?> confirmar(@PathVariable Long id) {
         return RespuestaDto.correcta(
